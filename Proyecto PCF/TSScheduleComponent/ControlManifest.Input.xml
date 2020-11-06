@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="bootcamp365" constructor="TSScheduleComponent" version="0.0.1" display-name-key="TSScheduleComponent" description-key="TSScheduleComponent description" control-type="standard">
+<!-- dataset node represents a set of entity records on CDS; allow more than one datasets -->
+    <data-set name="sampleDataSet" display-name-key="Dataset_Display_Key">
+      <property-set name="Schedule" display-name-key="Schedule" description-key="Schedule of the session" of-type="SingleLine.Text" usage="bound" required="true" />
+      <property-set name="Session" display-name-key="Session" description-key="Session name" of-type="SingleLine.Text" usage="bound" required="true" />
+      <property-set name="Speaker" display-name-key="Speaker" description-key="Speaker of the session" of-type="SingleLine.Text" usage="bound" required="true" />
+    </data-set>
+    <resources>
+      <code path="index.ts" order="1"/>   
+      <css path="Styles/styles.css" order="1" />
+    </resources>
+  </control>
+</manifest>

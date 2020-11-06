@@ -1,0 +1,65 @@
+
+#scheduleContainer
+{
+    height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 850px;
+    margin-top: 50px;
+    margin-left: 20px;
+    background-color: #1D1D1D;
+    padding-right: 10px;
+    padding-top: 20px;
+}
+
+.itemSchedule
+{
+    height: 40px;
+    width: 800px;
+    margin-bottom: 40px;
+    float: left;
+}
+
+.time
+{
+    float: left;
+    background-color: #00B050;
+    color: aliceblue;
+    margin-right: 5px;
+    height: 45px;
+    width: 100px;
+    text-align: center;
+    vertical-align:middle;
+    margin-left: 50px;
+    padding-top: 5px;
+}
+
+.sessionData
+{
+    width: 600px;
+    float: left;
+    height: 45px;
+    text-align: left;
+    background-color: white;
+    padding-left: 20px;
+    padding-top: 5px;
+}
+
+.title
+{
+    font-size: 16px;
+    color: black;
+    text-align: left;
+    height: 20px;
+    margin-bottom: 2px;
+}
+
+.speaker
+{
+    font-size: 12px;
+    color: green;
+
+    text-align: left;
+    height: 15px;
+}
+
