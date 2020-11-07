@@ -115,3 +115,208 @@ Una vez añadido el permiso, y al ser éste de Aplicación, debemos dar consenti
 ![register aad app 7](./assets/register-aad-app-8.png)
 
 Llegado a este punto, es por fin momento de empezar con el código... acaso no es esto un Developer Bootcamp?!!
+
+## List Teams SPFx Webpart
+
+Vamos a crear nuestro Webpart de SPFx que luego registraremos como Teams messaging extension. Este webpart es donde se hará la mayor parte de la funcionalidad. En él, utilizando el Graph Http Client del propio framework, accederemos a la Graph API y sacaremos los 20 primeros Teams de la Tenant.
+
+Antes de crear el Webpart, crea una carpeta que contendrá la solución completa, que incluye el webpart, y también el Bot.
+
+```js
+mkdir mge-spfx-lab
+```
+
+Y ahora crea otra carpeta para el proyecto del SPFx Webpart
+
+```js
+mkdir spfx-teams-webpart
+```
+
+Dentro de esta útlima carpeta, lanza el comando de Yeoman para crear el proyecto SPFx:
+
+```js
+yo @microsoft/sharepoint
+```
+
+Puedes dejar los valores por defecto que te va ofreciendo el asistente de Yeoman en casi todas las preguntas. Tan solo cambia el nombre del webpart, y asegúrate de elegir __React__ como framework. La siguiente imagen tiene todos los valores a asignar:
+
+![webpart-1](./assets/webpart-1.png)
+
+Después de 1 minuto (o 2), ya tendrás tu webpart creado, así que es momento de añadir la funcionalidad que queremos.
+
+Primero de todo, añade unas nueva carpetas dentro de la carpeta __src__:
+  - models
+
+Dentro de esa carpeta, crea un ficher __IGraphTeam.ts__. Esta interfaz va a modelar la información que necesitaremos de un Team: nombre, descripción, imagen, y poco más.
+
+Así que añade el siguiente código a dicho fichero:
+
+```ts
+export interface IGraphTeam {
+  id: string;
+  displayName: string;
+  description: string;
+  thumbnailUrl: string;
+}
+```
+
+Haciendo uso de la "componentización", nuestro webpart de SPFx estará compuesto por los siguientes componente de React:
+
+![webpart-2](./assets/webpart-2.png)
+
+  - __TeamsListWebPart__: es el webpart propiamente dicho. Su trabajo es inicializar ciertas cosas relacionadas con el mismo framework de SPFx, como por ejemplo la librería del PnPJS, o determinar si estamos corriendo en el contexto de una Teams messaging extension (recuerda que al ser un webpart, éste podría correr perfectamente en una página de SharePoint, o una Tab de Teams, y en ese caso, la funcionalidad estaría limitada). Además, inicializa el componente hijo, pasando las _props_ necesarias (por ejemplo el contexto de Teams).
+  - __TeamsList__: Este sería lo que React un llama _Smart Component_. Se encarga de sacar los datos llamando a la API de Graph, y pasar estos datos a su componente hijo. También se encarga de renderizar un mensaje de carga de datos, mientras los datos no han sido obtenidos (el típico _spinner_ de "_Loading data_")
+  - __AllTeams__: este componente ya renderiza los datos como una lista de componentes TeamDetail
+  - __TeamDetail__: este componente renderiza la información de un Team concreto, además de realizar la acción de "_Share Team_", que llamará al Bot para que la información del Team se incruste en el chat de MS Teams.
+
+Siendo así, vamos a crear los siguientes nuevos ficheros dentro de la carpeta __components__:
+
+__ITeamsListState.ts__
+
+Define el estado del componente ITeamsListState, que basicamente será una lista de Teams. Añadimos el siguiente código al archivo:
+
+```ts
+import { IGraphTeam } from "../../../models/IGraphTeam";
+
+export interface ITeamsListState {
+  teams: IGraphTeam[];
+}
+```
+
+Para dar el _look and feel_ deseado, vamos a editar el ficher existente __TeamsList.module.scss__ con el siguiente código:
+
+```css
+@import '~office-ui-fabric-react/dist/sass/References.scss';
+
+.teamsList {
+  .image {
+    display: block;
+    border: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+ }
+
+  .card {
+    /* Add shadows to create the "card" effect */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    flex: 0 1 calc(35% - 1em);
+  }
+
+  /* On mouse-over, add a deeper shadow */
+  .card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  }
+
+  /* Add some padding inside the card container */
+  .container {
+    padding: 2px 16px;
+  }
+}
+```
+
+Seguimos con el componente de más abajo de la jerarquía. Añade el fichero __TeamDetail.tsx__ con el siguiente código:
+
+```ts
+import * as React from 'react';
+
+import styles from './TeamsList.module.scss';
+import { IGraphTeam } from '../../../models/IGraphTeam';
+import { IIconProps } from 'office-ui-fabric-react/lib/components/Icon/Icon.types';
+import { ActionButton } from 'office-ui-fabric-react/lib/components/Button/ActionButton/ActionButton';
+import { IMicrosoftTeams } from '@microsoft/sp-webpart-base';
+
+export interface IGroupDetailProps {
+  group: IGraphTeam;
+  isTeamsMessagingExtension?: boolean;
+  teamsContext?: IMicrosoftTeams;
+}
+
+export interface IGroupDetailState {}
+
+export default class GroupDetail extends React.Component<IGroupDetailProps, IGroupDetailState> {
+
+  private groupClicked = (group: IGraphTeam): void => {
+    console.log("About to share group info", group);
+    if (this.props.isTeamsMessagingExtension) {
+      this.props.teamsContext.teamsJs.tasks.submitTask(group);
+    }
+  }
+
+  public render(): React.ReactElement<IGroupDetailProps> {
+
+    const shareIcon: IIconProps = { iconName: 'Share' };
+
+    return (
+      <div className={styles.card}>
+        <img className={styles.image} src={this.props.group.thumbnailUrl} alt="Group img"></img>
+        <div className={styles.container}>
+          <h4><b>{this.props.group.displayName}</b></h4>
+          <p>{this.props.group.description}</p>
+          <div>
+          <ActionButton
+            iconProps={shareIcon}
+            key={this.props.group.id}
+            onClick={() => this.groupClicked(this.props.group)}>Share Team</ActionButton>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+```
+
+Échemos un vistazo a las partes más importantes.
+
+El método __render__ no tiene mucho misterio, tan solo algunos DIVs para pintar la info del Teams (título, imagen, etc). Hacemos uso de algunos componentes del FluentUI, como el __ActionButton__, y cuando el botón se clica, lo que hacemos es enviar la información del Team, al Bot que está a la escucha. Esto lo hacemos a través del mismo framework de spfx, con el método __submitTask__:
+
+```ts
+    if (this.props.isTeamsMessagingExtension) {
+      this.props.teamsContext.teamsJs.tasks.submitTask(group);
+    }
+```
+
+Vamos ahora a crear un nuevo fichero llamado __AllTeams.tsx__ con el siguiente código:
+
+```ts
+import * as React from 'react';
+import styles from './TeamsList.module.scss';
+
+import { IGraphTeam } from "../../../models/IGraphTeam";
+import TeamDetail from './TeamDetail';
+import { IMicrosoftTeams } from '@microsoft/sp-webpart-base';
+
+export interface IAllTeamsProps {
+  teams: IGraphTeam[];
+  isTeamsMessagingExtension?: boolean;
+  teamsContext?: IMicrosoftTeams;
+}
+
+export interface IAllTeamsState {}
+
+export default class AllTeams extends React.Component<IAllTeamsProps, IAllTeamsState> {
+  public render(): React.ReactElement<IAllTeamsProps> {
+
+    const teams = this.props.teams.map(team => {
+      return <TeamDetail
+        group={team}
+        isTeamsMessagingExtension={this.props.isTeamsMessagingExtension}
+        teamsContext={this.props.teamsContext} />;
+    });
+
+    return (
+      <div className={styles.teamsList}>
+        <div className={styles.cards}>
+          {teams}
+        </div>
+      </div>
+    );
+  }
+}
+```
