@@ -31,6 +31,6 @@ npm install generator-teams
 
 **1.-** [Creación de un conector a través de webhooks entrantes (_incoming webhooks_)](./incoming-webhooks/readme.md)
 
-**2.-** [Creación de un conector personalizado en una WebApp de Azure](./webapp-connector-webhooks/readme.md)
+**2.-** [Creación de un conector personalizado en una WebApp de Azure](./webapp-connector/readme.md)
 
 **3.-** [Adaptive Cards](./adaptive-cards/readme.md)

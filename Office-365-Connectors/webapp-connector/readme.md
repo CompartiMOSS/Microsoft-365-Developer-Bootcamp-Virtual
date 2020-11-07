@@ -2,7 +2,7 @@
 
 ## Introducción
 
-Una vez hayamos utilizado los webhooks entrantes de Teams, podemos darnos cuenta de que puede servirnos para alguna función específica, pero no podemos extenderlo a cualquier quipo y canal de la compañía. Para eso tendremos que dotar a nuestro conector de un back-end que crearemos y personalizaremos para luego desplegarlo en Azure.
+Una vez hayamos utilizado los [webhooks entrantes de Teams](../incoming-webhooks/readme.md), podemos darnos cuenta de que puede servirnos para alguna función específica, pero no podemos extenderlo a cualquier quipo y canal de la compañía. Para eso tendremos que dotar a nuestro conector de un back-end que crearemos y personalizaremos para luego desplegarlo en Azure.
 
 ## Creación de la WebApp en Azure
 
@@ -464,3 +464,7 @@ Desplegamos de nuevo en Azure... y probamos nuestro "CustomEndpoint":
 ![Email generado](./images/webapp-26.png)
 
 ![TA-DA!](https://media1.giphy.com/media/JqDeI2yjpSRgdh35oe/giphy.gif)
+
+## ¡Eh, espera! ¡Que aún queda más!
+
+Si no has tenido suficiente, vamos a ver el [último ejercicio](../adaptive-cards/readme.md) con **Adaptive Cards**. Vamos, que te lo enseño 😉

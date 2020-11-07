@@ -114,4 +114,4 @@ Y una vez ejecutado, veremos nuestro resultado en Teams:
 
 ## ¿Quieres más?
 
-Vamos al siguiente workshop, donde [crearemos un conector personalizado en una WebApp de Azure.](./webapp-connector-webhooks/readme.md). De esta forma podremos tener el control completo de nuestro back-end y poder extenderlo de forma empresarial a todos los canales a través de una app.
+Vamos al siguiente workshop, donde [crearemos un conector personalizado en una WebApp de Azure.](../webapp-connector/readme.md). De esta forma podremos tener el control completo de nuestro back-end y poder extenderlo de forma empresarial a todos los canales a través de una app.
