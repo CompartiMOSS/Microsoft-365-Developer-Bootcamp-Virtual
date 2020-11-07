@@ -511,12 +511,117 @@ https://[TENANT].sharepoint.com/sites/[YOUR SITE]/_layouts/workbench.aspx
 En el workbench, agrega el webpart _TeamsList_ a la página. Si todo ha ido bien, deberás obtener un listado con algunos de los MS Teams teams de tu Tenant (obviamente asegúrate de que tu Tenant tiene algunos Teams de MS Teams creados).
 
 ## Desplegando el webpart en SharePoint
-
 Asumo que ya tienes cierta experiencia con spfx y sabes como hacer el deploy del webpart. Si no es el caso, aquí tienes las instrucciones con detalle de cómo hacerlo [https://docs.microsoft.com/en-us/sharepoint/dev/spfx/web-parts/get-started/serve-your-web-part-in-a-sharepoint-page](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/web-parts/get-started/serve-your-web-part-in-a-sharepoint-page). 
-En resumen:
+
+__Nota__: Cuando generamos el webpart con Yeoman, dejamos por defecto un valor que no era el correcto, y que hará que nuestro webpart no funcione dentro de Teams. Para corregir esto, editar el fichero: __\config\package-solution.json__ y añade lo siguiente, dentro del nodo __solution__ 
+
+```json
+"skipFeatureDeployment": true,
+```
+
+Una vez hecho esto, ya puedes seguir con el deploy. En resumen:
+
   - Compila y empaqueta tu webpart para producción:
   ```js
     gulp bundle --ship && gulp package-solution --ship
   ```
+  - Sube y despliega el fichero _.sppkg_ al App Catalog de tu SharePoint. Si todo ha ido bien, tendrás una carpeta _sharepoint\solution_ con un fichero con extensión __.sppkg__.
+  - Si ahora quieres, puedes instalar la App en cualquier TeamSite, y añadir el webpart a una de sus páginas. No es necesario para lo que queremos hacer.
 
 ## Desplegando el webpart en Teams
+
+Ahora empieza lo defícil :D. Tenemos que decirle a nuestro webpart, que puede funcionar como Teams messaging extension. Para ello, tenemos que crear un _manifest_ para Teams, para ello, dentro de la carpeta __teams__ del webpart, añade un nuevo fichero con nombre __manifest.json__. Puedes usar el siguiente ejemplo, y modificar los valores que pongo entre doble asterisco y en mayúsculas ** EJEMPLO ** (haz una búsqueda por doble asterisco para asegurarte que no se te pasa ninguno):
+
+```json
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.7/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.7",
+  "version": "1.0.0",
+  "id": "** CREA UN NUEVO GUID **",
+  "packageName": "com.bootcamp.teams.shareTeam",
+  "developer": {
+    "name": "M365 Dev Bootcamp",
+    "websiteUrl": "https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/tree/master/TeamsMessagingExtensionsWithSpfx",
+    "privacyUrl": "https://github.com",
+    "termsOfUseUrl": "https://github.com"
+  },
+  "icons": {
+    "color": "** TIENES EL FICHERO EN LA MISMA CARPETA, COPIA SU NOMBRE -> 8a09d673-6d69-4023-851d-26bfe2302f44_color.png",
+    "outline": "** TIENES EL FICHERO EN LA MISMA CARPETA, COPIA SU NOMBRE -> 8a09d673-6d69-4023-851d-26bfe2302f44_outline.png"
+  },
+  "name": {
+    "short": "M365Bootcamp Teams Bot",
+    "full": "M365Bootcamp Teams messaging extensions for Teams"
+  },
+  "description": {
+    "short": "M365Bootcamp Teams messaging extensions for Teams",
+    "full": "This messaging extensions allows you to search for a MS Teams team, and send the information into the chat window"
+  },
+  "accentColor": "#FFFFFF",
+  "composeExtensions": [
+    {
+      "botId": "** ESTE ES EL ID DE LA APP CREADA CUANDO REGISTRATE EL BOT CHANNEL **",
+      "canUpdateConfiguration": true,
+      "commands": [
+        {
+          "id": "shareTeam",
+          "type": "action",
+          "title": "Share Team info",
+          "description": "Find and share a Team",
+          "initialRun": false,
+          "fetchTask": false,
+          "context": [
+            "commandBox",
+            "compose"
+          ],
+          "taskInfo": {
+            "title": "Share a Team",
+            "width": "700",
+            "height": "600",
+            "url": "https://{teamSiteDomain}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest=/_layouts/15/teamstaskhostedapp.aspx%3Fteams%26personal%26componentId=**GUID DE TU WEBPART (lo tienes en el manifest del propio webpart: TeamsListWebPart.manifest.json)**%26forceLocale={locale}"
+          }
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "*.login.microsoftonline.com",
+    "*.sharepoint.com",
+    "*.sharepoint-df.com",
+    "spoppe-a.akamaihd.net",
+    "spoprod-a.akamaihd.net",
+    "resourceseng.blob.core.windows.net",
+    "msft.spoppe.com"
+  ],
+  "webApplicationInfo": {
+    "resource": "https://{teamSiteDomain}",
+    "id": "00000003-0000-0ff1-ce00-000000000000"
+  }
+}
+```
+
+Una vez editado el manifest, lo siguiente es hacer un .zip de los 3 ficheros de la carpeta _teams_ (el manifest.json y los 2 .png). Asegúrate de comprimir los 3 ficheros, y NO la carpeta _teams_
+
+Con ese .zip, vamos a desplegarlo en MS Teams. Para ello, abre la web de Teams: [https://teams.microsoft.com/](https://teams.microsoft.com/), y pincha en el icono "Apps"
+
+![deploy-webpart-teams-1](./assets/deploy-webpart-teams.png)
+
+![deploy-webpart-teams-2](./assets/deploy-webpart-teams-2.png)
+
+Selecciona el fichero .zip que has generado.
+
+![deploy-webpart-teams-3](./assets/deploy-webpart-teams-3.png)
+
+Si todo ha ido bien, ahora puedes ir a una conversación de un chat o un Team, y verás que en el control donde escribes, aparece el botón de nuestra messaging extension, y si pinchamos, aparece un pop-up con el listado de nuestros Teams!!
+
+![deploy-webpart-teams-4](./assets/deploy-webpart-teams-4.png)
+
+Sin embargo, si pinchamos en "Share Team", obtendremos un error, de que la App no se ha podido alcalnzar. Esto es totalmente esperado en este punto, ya que necesitamos completar la segunda parte del Lab, donde crearemos un Bot, que recogerá el mensaje lanzado por nuestro webpart de SPFx, junto con la info de un Team, y compondrá el mensaje en el cuadro del chat. En otras palabras, a día de hoy, el webpart spfx no es capaz de componer un mensaje en el chat, y necesita que un Bot procese su acción.
+
+Vamos a crear ese Bot!!
+
+## Creación del Bot para nuestra Messaging Extension

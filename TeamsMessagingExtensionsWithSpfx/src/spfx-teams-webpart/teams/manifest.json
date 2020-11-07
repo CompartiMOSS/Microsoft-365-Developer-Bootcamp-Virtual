@@ -1,0 +1,69 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.7/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.7",
+  "version": "1.0.0",
+  "id": "fe9b43a7-8d59-4613-87a0-fe4d61e31bf7",
+  "packageName": "com.bootcamp.teams.shareTeam",
+  "developer": {
+    "name": "Luis Mañez",
+    "websiteUrl": "https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/tree/master/TeamsMessagingExtensionsWithSpfx",
+    "privacyUrl": "https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/tree/master/TeamsMessagingExtensionsWithSpfx",
+    "termsOfUseUrl": "https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/tree/master/TeamsMessagingExtensionsWithSpfx"
+  },
+  "icons": {
+    "color": "8a09d673-6d69-4023-851d-26bfe2302f44_color.png",
+    "outline": "8a09d673-6d69-4023-851d-26bfe2302f44_outline.png"
+  },
+  "name": {
+    "short": "M365Bootcamp Teams Bot",
+    "full": "M365Bootcamp Teams messaging extensions for Teams"
+  },
+  "description": {
+    "short": "M365Bootcamp Teams messaging extensions for Teams",
+    "full": "This messaging extensions allows you to search for a MS Teams team, and send the information into the chat window"
+  },
+  "accentColor": "#FFFFFF",
+  "composeExtensions": [
+    {
+      "botId": "66a4f04e-0bb9-404e-b1c5-1c3e986c71c9",
+      "canUpdateConfiguration": true,
+      "commands": [
+        {
+          "id": "shareTeam",
+          "type": "action",
+          "title": "Share Team info",
+          "description": "Find and share a Team",
+          "initialRun": false,
+          "fetchTask": false,
+          "context": [
+            "commandBox",
+            "compose"
+          ],
+          "taskInfo": {
+            "title": "Share a Team",
+            "width": "700",
+            "height": "600",
+            "url": "https://{teamSiteDomain}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest=/_layouts/15/teamstaskhostedapp.aspx%3Fteams%26personal%26componentId=8a09d673-6d69-4023-851d-26bfe2302f44%26forceLocale={locale}"
+          }
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "*.login.microsoftonline.com",
+    "*.sharepoint.com",
+    "*.sharepoint-df.com",
+    "spoppe-a.akamaihd.net",
+    "spoprod-a.akamaihd.net",
+    "resourceseng.blob.core.windows.net",
+    "msft.spoppe.com"
+  ],
+  "webApplicationInfo": {
+    "resource": "https://{teamSiteDomain}",
+    "id": "00000003-0000-0ff1-ce00-000000000000"
+  }
+}
