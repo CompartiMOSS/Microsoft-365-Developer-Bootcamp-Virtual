@@ -81,3 +81,37 @@ Crea un nuevo Secret para la App, y guárdalo a buen recaudo junto al App ID
 ![register bot 7](./assets/register-bot-7.png)
 
 Vuelve a la pantalla de __Settings__ del Channel, porque luego necesitaremos actualizar el _messaging endpoint_, así que deja el navegador abierto en esa pantalla.
+
+## Registrar Azure AD App para llamar a Graph desde el Bot
+
+Es tiempo ahora de registar una nueva aplicación de Azure Active Directory, que nos va a servir para poder consumir datos de MS Graph API desde nuestro bot.
+__Importante__: Esta nueva App, hay que registrarla en el Azure Active Directory de la Tenant de Office 365. El registro del Bot puede hacerse en cualquier suscripción de Azure, que puede estar en el mismo Directorio que la Tenant de Office 365, o no, de ahí que esta App se requira registar en el Directorio de la Tenant de Office 365, que es donde finalmente están los datos que queremos consumir a través de la Graph API.
+
+Abrimos el portal de Azure de la Tenant de Office 365, vamos a la sección de __App Registrations__ y registramos una nueva Aplicación, tal y como muestra la imagen siguiente:
+
+![register aad app 1](./assets/register-aad-app-1.png)
+![register aad app 2](./assets/register-aad-app-2.png)
+
+Una vez creada la App, guarda a buen recaudo el Client ID y Tenant ID:
+
+![register aad app 3](./assets/register-aad-app-3.png)
+
+Ahora necesitamos crear un nuevo __Secret__, que de nuevo guardaremos a buen recaudo para utilizar luego en nuestro código:
+
+![register aad app 4](./assets/register-aad-app-4.png)
+
+Finalmente, ya que el objetivo de esta AAD App es poder consumir información de Graph, en nuestro caso queremos listar los Teams de la Tenant, debemos asignar los permisos necesarios en Graph. Para ello saltamos a la sección __API Permissions__
+
+![register aad app 5](./assets/register-aad-app-5.png)
+
+Seleccionamos ahora permisos de Aplicación, y añadimos permisos para poder leer los Grupos de la Tenant.
+
+![register aad app 6](./assets/register-aad-app-6.png)
+
+Una vez añadido el permiso, y al ser éste de Aplicación, debemos dar consentimiento a nivel de Administrador, así que clicamos en el botón de __Grant Admin permissions__ y confirmamos el mensaje.
+
+![register aad app 7](./assets/register-aad-app-7.png)
+
+![register aad app 7](./assets/register-aad-app-8.png)
+
+Llegado a este punto, es por fin momento de empezar con el código... acaso no es esto un Developer Bootcamp?!!
