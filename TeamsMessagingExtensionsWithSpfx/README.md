@@ -320,3 +320,203 @@ export default class AllTeams extends React.Component<IAllTeamsProps, IAllTeamsS
   }
 }
 ```
+
+No mucho que destacar en el codigo anterior, simplemente iteramos los Teams que recibe el componente en sus _props_, y pintamos cada Team a traves del componente _TeamDetail_
+
+Pasamos ahora a editar el componente __TeamsList.tsx__, que hara el trabajo de obtener los Teams a partir de la Graph API.
+
+Para acceder a Graph, vamos a hacerlo a traves de la genial libreria [PnP JS](https://pnp.github.io/pnpjs/), que si no la conoceis, o quereis profundizar mas de lo que vamos a ver ahora, os recomiendo que veais manana la sesion que tengo sobre ella:
+__Todo sobre PnP JS y PnP React components__: Miercoles 11, a las 17h en Room 1
+
+Primero necesitamos instalar la libreria del PnP, que se compone de diferentes modulos, asi que instalaremos los necesarios para acceder a Graph, que son:
+
+```js
+npm install @pnp/logging @pnp/common @pnp/odata @pnp/graph --save
+```
+
+Editamos la clase __TeamsList__ con la siguiente definicion:
+
+```ts
+export default class TeamsList extends React.Component<ITeamsListProps, ITeamsListState> {
+```
+
+Definimos el constructor de la clase, donde inicializamos el estado del componente:
+
+```ts
+constructor(props: ITeamsListProps) {
+    super(props);
+
+    this.state = {
+      teams: []
+    };
+}
+```
+
+Ahora sobrescribimos el método del ciclo de vida del componente React __componentDidMount__, para que obtengamos los Teams a través de la Graph API, usando la librería del PnP JS que hemos instalado anteriormente.
+
+```ts
+  public componentDidMount(): void {
+    graph.groups
+      .setEndpoint("beta")
+      .top(20)
+      .select("id, displayName, description")
+      .filter("resourceProvisioningOptions/Any(x:x eq 'Team')") // only Teams: https://docs.microsoft.com/en-us/graph/teams-list-all-teams#get-a-list-of-groups-using-beta-apis
+      .get()
+      .then((teams) => {
+        this.setState({
+          teams: teams.map((team: IGraphTeam, index: number) => {
+            index += 10;
+            return {
+              displayName: team.displayName,
+              id: team.id,
+              description: team.description,
+              thumbnailUrl: `https://picsum.photos/id/${index}/200/100`,
+            };
+          }),
+        });
+      });
+  }
+```
+
+Al copiar el código anterior, debemos importar el objeto _graph_:
+
+```ts
+import { graph } from "@pnp/graph/presets/all";
+```
+
+Vamos a deternos aquí y revisar el código que tenemos en el _componentDidMount_. Utilizamos el objeto _graph_ del PnP JS, que nos da acceso al Endpoint de Groups de MS Graph (al final los Teams son también grupos de Office 365), establecemos el endpoint Beta, pues que el _filter_ que estamos especificando, sólo está disponible en el beta endpoint de Graph. Dicho filter nos va a devolver sólo aquellos grupos que son Teams, luego obtenemos los primeros 20 Teams, y seleccionamos sólo los campos _id_, _displayName_ y _description_. Una vez obtenemos la _response_ de Graph, actualizamos el _state_ del componente con los Teams obtenidos. Como te habrás dado cuenta, para la imagen estamos usando una imagen aleatoria que nos devuelve la web _picsum_. La cosa es que para obtener la foto del Team, tendríamos que hacer otra petición a Graph, así que por simplicidad, lo vamos a dejar así (sería un ejercicio interesante para aquellos que completéis el lab antes de tiempo :D).
+
+Antes de cambiar el _render_ del componente, vamos a definir algunas _props_ extras que este componente va a recibir del webpart.
+
+Edita el fichero __ITeamsListProps.ts__ con el siguiente código:
+
+```ts
+import { IMicrosoftTeams } from "@microsoft/sp-webpart-base";
+
+export interface ITeamsListProps {
+  isTeamsMessagingExtension?: boolean;
+  teamsContext?: IMicrosoftTeams;
+}
+```
+
+Lo que estamos haciendo aquí es que el webpart pasará al __TeamsList__, component un par de propiedades:
+  - __isTeamsMessagingExtension__: nos indicará si el webpart spfx está corriendo como messaging extension en Teams.
+  - __teamsContext__: este objeto viene del propio framework spfx, y tiene objetos y propiedades relacionadas con el contexto de Teams en el que corre el webpart.
+
+Vuelve ahora al fichero __TeamsList.tsx__ para editar el método _render_ con el siguiente código:
+
+```ts
+  public render(): React.ReactElement<ITeamsListProps> {
+    if(this.state.teams.length <= 0) {
+      return(
+        <Shimmer
+          shimmerElements={[
+            { type: ShimmerElementType.line, width: 246, height: 246 },
+            { type: ShimmerElementType.gap, width: '2%' },
+            { type: ShimmerElementType.line, width: 246, height: 246 },
+            { type: ShimmerElementType.gap, width: '2%' },
+            { type: ShimmerElementType.line, width: 246, height: 246 },
+            { type: ShimmerElementType.gap, width: '2%' },
+            { type: ShimmerElementType.line, width: '100%', height: 246 }
+          ]}
+        />
+      );
+    }
+
+    return (
+      <AllTeams
+        teams={this.state.teams}
+        isTeamsMessagingExtension={this.props.isTeamsMessagingExtension}
+        teamsContext={this.props.teamsContext} />
+    );
+  }
+```
+
+Poco que contar en el _render_, simplemente comprobamos si los datos de Graph se han recibido ya, si no es el caso, mostramos un _Shimmer_ (podéis ver lo que hace este control [aquí](https://developer.microsoft.com/en-us/fluentui#/controls/web/shimmer)), que indica al usuario que los datos se están cargando. Si los datos ya se han cargado, renderizamos el componente de React que se encarga de pintar todos los Teams recibidos.
+
+Para finalizar nuestro webpart, vamos a editar el fichero __TeamsListWebPart.ts__ (el webpart en sí), ya que necesitamos hacer bastantes cambios. Primero de todo, como nuestros componentes están haciendo uso de los Iconos de la librería _FluentUI_, necesitamos un pequeño workaround para que dichos iconos se muestren correctamente cuando el webpart se ejecuta dentro de Teams (cuando corre en SharePoint, esto no es necesario, pero sí para Teams). Para dicho workaround, necesitamos importar la función _initializeIcons_ de la propia librería _FluentUI_ (antiguamente conocida como OfficeUI Fabric).
+
+```ts
+import { initializeIcons } from 'office-ui-fabric-react';
+```
+
+Ahora, definimos una propiedad privada al webpart, que daremos el valor de si el webpart se está ejecutando como Teams messaging extension o no:
+
+```ts
+private isTeamsMessagingExtension: boolean;
+```
+
+Seguidamente, vamos a definir el método __onInit__ del webpart, ya que necesitamos inicializar la librería del PnP JS aquí, los iconos de _FluentUI_ que mencionamos antes, además de dar valor a la propiedad _isTeamsMessagingExtension_.
+
+```ts
+public onInit(): Promise<void> {
+
+    initializeIcons();
+
+    this.isTeamsMessagingExtension = (this.context as any)._host &&
+                                      (this.context as any)._host._teamsManager &&
+                                      (this.context as any)._host._teamsManager._appContext &&
+                                      (this.context as any)._host._teamsManager._appContext.applicationName &&
+                                      (this.context as any)._host._teamsManager._appContext.applicationName === 'TeamsTaskModuleApplication';
+
+    console.log("isTeamsMessagingExtension", this.isTeamsMessagingExtension);
+
+    return super.onInit().then(_ => {
+      graph.setup({
+        spfxContext: this.context
+      });
+    });
+  }
+```
+
+Importamos la clase _graph_
+
+```ts
+import { graph } from '@pnp/graph';
+```
+
+Vamos a ver qué estamos haciendo en ese __onInit__:
+  - Primero llamamos al _initializeIcons_ para resolver el tema de los iconos que ya hemos comentado.
+  - Luego damos valor a la variable que nos dice si el webpart está corriendo como Teams messaging extension. Para ello tenemos que inspeccionar el _applicationName_ que está bastante escondido dentro del contexto del webpart (a mi esto me parece un poco _hack_, y supongo que lo harán mejor en posteriores versiones, ya que el objeto _"_host"_ ni si quiera lo han tipado, y siendo que el nombre de la propiedad lo han prefijado con "_", indica que la idea era hacerlo "oculto". Pero bueno, de momento es la documentación oficial de MS)
+  - Inicializamos la librería de PnP JS, invocando su método _setup_, pasando el contexto del webpart.
+
+Ya sólo queda cambiar ligeramente el _render_ del webpart, para pasar las propiedades que el componente _TeamsList_ está esperando.
+
+```ts
+  public render(): void {
+    const element: React.ReactElement<ITeamsListProps> = React.createElement(
+      TeamsList,
+      {
+        teamsContext: this.context.sdks.microsoftTeams,
+        isTeamsMessagingExtension: this.isTeamsMessagingExtension
+      }
+    );
+
+    ReactDom.render(element, this.domElement);
+  }
+```
+
+Llegado a este punto, hemos cumplido nuestra primera _milestone_, así que es momento de ver qué tal vamos, y ejecutar nuestro webpart en el mismo SharePoint workbench. Para ello, vete a la consola de comandos, dentro de la carpeta raíz del webpart spfx, y lanza:
+
+```js
+gulp serve --nobrowser
+```
+
+Si no tienes ningún error en la consola, abre cualquier TeamSite en SharePoint, y añade "/_layouts/workbench.aspx" para cargar el SharePoint Workbench. Por ejemplo:
+
+```js
+https://[TENANT].sharepoint.com/sites/[YOUR SITE]/_layouts/workbench.aspx
+```
+
+En el workbench, agrega el webpart _TeamsList_ a la página. Si todo ha ido bien, deberás obtener un listado con algunos de los MS Teams teams de tu Tenant (obviamente asegúrate de que tu Tenant tiene algunos Teams de MS Teams creados).
+
+## Desplegando el webpart en SharePoint
+
+Asumo que ya tienes cierta experiencia con spfx y sabes como hacer el deploy del webpart. Si no es el caso, aquí tienes las instrucciones con detalle de cómo hacerlo [https://docs.microsoft.com/en-us/sharepoint/dev/spfx/web-parts/get-started/serve-your-web-part-in-a-sharepoint-page](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/web-parts/get-started/serve-your-web-part-in-a-sharepoint-page). 
+En resumen:
+  - Compila y empaqueta tu webpart para producción:
+  ```js
+    gulp bundle --ship && gulp package-solution --ship
+  ```
+
+## Desplegando el webpart en Teams

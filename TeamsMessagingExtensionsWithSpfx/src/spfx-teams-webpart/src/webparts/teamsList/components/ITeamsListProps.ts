@@ -1,3 +1,6 @@
+import { IMicrosoftTeams } from "@microsoft/sp-webpart-base";
+
 export interface ITeamsListProps {
-  description: string;
+  isTeamsMessagingExtension?: boolean;
+  teamsContext?: IMicrosoftTeams;
 }

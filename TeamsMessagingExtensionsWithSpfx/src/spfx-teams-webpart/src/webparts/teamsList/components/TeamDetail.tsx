@@ -17,7 +17,6 @@ export interface IGroupDetailState {}
 export default class GroupDetail extends React.Component<IGroupDetailProps, IGroupDetailState> {
 
   private groupClicked = (group: IGraphTeam): void => {
-    console.log("About to share group info", group);
     if (this.props.isTeamsMessagingExtension) {
       this.props.teamsContext.teamsJs.tasks.submitTask(group);
     }
