@@ -8,7 +8,10 @@
     "debug": "gulp serve --debug"
   },
   "dependencies": {
+    "@fluentui/react-northstar": "~0.51.0",
     "@microsoft/teams-js": "1.8.0",
+    "@pnp/graph-commonjs": "^2.0.11",
+    "@pnp/nodejs-commonjs": "^2.0.11",
     "axios": "^0.19.2",
     "botbuilder": "4.10.4",
     "botbuilder-dialogs": "4.10.4",
@@ -20,7 +23,6 @@
     "express-session": "1.15.6",
     "morgan": "1.9.1",
     "msteams-react-base-component": "^2.2.0",
-    "@fluentui/react-northstar": "~0.51.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },

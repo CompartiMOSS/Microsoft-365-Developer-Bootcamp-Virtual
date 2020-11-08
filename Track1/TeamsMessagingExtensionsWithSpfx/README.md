@@ -646,3 +646,144 @@ Puedes dejar practicamente todos los valores sugeridos por la plantilla. El unic
 
 ![yo teams 1](./assets/yo-teams-1.png)
 
+Una vez termina Yeoman de hacer su trabajo, tendremos nuestro Bot creado. El Bot es un poco simplón, se trata de un Bot conversacional, que atiende simplemente los comandos de _Hello_ y _Help_. Si tenéis curiosidad, podéis echar un ojo al código generado en el archivo __\bot-teams-mge\src\app\botTeamsMgeBot\BotTeamsMgeBot.ts__. De todas formas, nosotros no necesitamos un Bot conversacional, y de hecho, no llegaremos a desplegar el bot en Teams. Nosotros sólo necesitamos una _messaging extension_, que se ejecutará cuando se dispare la acción de _Share Team_ desde el webpart de SPFx.
+
+Antes de añadir el código para manejar la acción disparada desde spfx, vamos a dar valor a algunas variables de entorno que necesita nuestro Bot Messaging Extension. Para ello, tenemos que editar el fichero __.env__ que se encuentra en el raíz de nuestro proyecto Bot. Allí podemos ver que hay una variable __MICROSOFT_APP_ID__ que ya contiene el valor adecuado, ya que la plantilla de Yeoman nos preguntó dicho valor en la creación del proyecto. Debemos dar un valor a la variable __MICROSOFT_APP_PASSWORD__, con el valor del _Secret_ que creamos en la AAD App de nuestro Bot (ya sabes, aquella con el __MICROSOFT_APP_ID__).
+
+Además, añade las siguientes variables al final del fichero (los valores son los que guardaste cuando seguiste el punto _Registrar Azure AD App para llamar a Graph desde el Bot_):
+
+```
+# App ID and Secret to call Graph API
+GRAPH_APP_ID=** La AAD App que registramos y dimos permisos para llamar a Graph API **
+GRAPH_APP_SECRET=** El Secret que creamos a esta App **
+TENANT_ID=** El ID de tu Tenant de Office 365 **
+```
+
+Nuestra messaging extension, recibirá la info del Teams desde SPFx, pero además, hará una llamada a Graph API, para sacar el Link a ese Team, y que el usuario pueda saltar directamente a ese Teams desde la propia Card de la conversación. Para ello, vamos a hacer uso de nuevo de la librería PnP JS, que nos va a facilitar mucho el proceso de obtener un Token de Authorization para Graph, así como la llamada al endpoint the _teams_, para sacar la web URL de ese Team. Así que primero, vamos a instalar los paquetes necesarios del PnP JS, para ello, desde la consola:
+
+```
+npm install @pnp/nodejs-commonjs @pnp/graph-commonjs --save
+```
+
+Llegado a este punto, ya podemos añadir el código de la messaging extension. Primero, vamos a configurar la librería del PnpJS. Abre el fichero __\bot-teams-mge\src\app\botTeamsMgeBot\BotTeamsMgeBot.ts__ y al final de su constructor, añade el siguiente código para inicializar PnPJS:
+
+```ts
+graph.setup({
+            graph: {
+                fetchClientFactory: () => {
+                    return new MsalFetchClient({
+                        auth: {
+                            authority: `https://login.microsoftonline.com/${process.env.TENANT_ID}`,
+                            clientId: process.env.GRAPH_APP_ID || '',
+                            clientSecret: process.env.GRAPH_APP_SECRET,
+                        }
+                    });
+                },
+            },
+        });
+```
+
+Para solucionar los errores sobre el objeto _graph_ y _MsalFetchClient_, añade los siguientes imports al fichero:
+
+```ts
+import { graph } from "@pnp/graph-commonjs";
+import { MsalFetchClient } from "@pnp/nodejs-commonjs";
+```
+
+Ahora vamos a añadir el código necesario para que la messaging extension reaccione al evento de "Share Team" enviado desde spfx. Para ello, añade el siguiente código al archivo __\bot-teams-mge\src\app\botTeamsMgeBot\BotTeamsMgeBot.ts__:
+
+```ts
+    protected async handleTeamsMessagingExtensionSubmitAction(context: TurnContext, action: MessagingExtensionAction): Promise<MessagingExtensionActionResponse> {
+        const group: any = action.data;
+
+        const team = await graph.teams.getById(group.id)();
+        console.log(team);
+
+        const cardAction: CardAction = {
+            type: ActionTypes.OpenUrl,
+            title: "Jump to Team",
+            value: team.webUrl
+        };
+
+        const groupCard = CardFactory.heroCard(group.displayName, group.description, [group.thumbnailUrl], [cardAction], undefined);
+
+        const response: MessagingExtensionActionResponse = {
+            composeExtension: {
+                type: 'result',
+                attachmentLayout: 'list',
+                attachments: [groupCard]
+            }
+        }
+
+        return Promise.resolve(response);
+    }
+```
+
+Utiliza el intellisense de VS Code para resolver los errores de referencias. 
+
+Vamos a diseccionar el código de este evento, ya que están pasando bastantes cosas. Primero, el método recibe como parámetro un __MessagingExtensionAction__, que en su propiedad _data_, tenemos el objeto que envió el SPFx cuando disparó la acción "Share Team", en este caso, nuestro Team, con su nombre, descripción, etc.
+
+Como también necesitamos la URL de Teams, que no nos viene desde SPFx, lo siguiente es usar la PnPJS para llamar a Graph API y sacar la info del Team, que incluirá su URL.
+
+```ts
+const team = await graph.teams.getById(group.id)();
+```
+
+Para incrustar la información del Team en nuestro chat de MS Teams, debemos componer una __Adaptive Card__, que a su vez queremos incluir el Link al propio Team, y para ello necesitamos una __CardAction__ de tipo _OpenUrl_. Ambas cosas las conseguimos con el siguiente código:
+
+```ts
+    const cardAction: CardAction = {
+        type: ActionTypes.OpenUrl,
+        title: "Jump to Team",
+        value: team.webUrl
+    };
+
+    const groupCard = CardFactory.heroCard(group.displayName, group.description, [group.thumbnailUrl], [cardAction], undefined);
+```
+
+Finalmente, el método debe retornar un objeto __MessagingExtensionActionResponse__ que incluya la Adaptive Card, y eso es lo que conseguimos con el siguiente código:
+
+```ts
+        const response: MessagingExtensionActionResponse = {
+            composeExtension: {
+                type: 'result',
+                attachmentLayout: 'list',
+                attachments: [groupCard]
+            }
+        }
+
+        return Promise.resolve(response);
+```
+ Pues ya tenemos todo el código que necesitamos para nuestro Bot Messaging Extension. Es hora de probar toda nuestra solución. Si recuerdas del momento de registro del Bot Channel, tuvimos que incluir una URL, que dijimos que cambiaríamos más adelante. Ha llegado el momento de ello... pero qué URL ponemos?... Nuestro Bot necesita exponer un endpoint, que se invoca cuando el webpart envía la acción de "Share Team". Una opción es desplegar nuestro bot en una web app de Azure, pero para desarrollo y debug se vuelve complicado. Otra opción es usar __ngrok__, que instalamos como pre requisito del lab. ngrok hará un tunnel entre nuestra máquina, y una dirección pública. Para ello, el generador de _Yo Teams_ nos ha preparado una tarea de _gulp_ que arranca y configura _ngrok_. Volvamos a la consola, desde el proyecto raíz del Bot, ejecutamos:
+
+ ```
+ gulp ngrok-serve
+ ```
+
+ En la consola, la tarea de _gulp_ nos mostrará la URL pública que _ngrok_ nos ha asignado:
+
+ ![ngrok start](./assets/ngrok-start.png)
+
+ Copia esa URL, y vuelve al portal de Azure, y al Bot Channel Registration que realizaste al comienzo del lab. En la sección de _Settings_, actualiza el valor __Messaging endpoint__ con esa URL, y asegúrate que concatenas el valor __/api/messages__
+
+ ![ngrok bot url](./assets/bot-ngrok-url.png)
+
+ Y por qué _api/messages_ ?? fácil, es el endpoint que nosotros mismos estamos definiendo en nuestro bot:
+
+ ```ts
+@BotDeclaration(
+    "/api/messages",
+    new MemoryStorage(),
+    process.env.MICROSOFT_APP_ID,
+    process.env.MICROSOFT_APP_PASSWORD)
+@PreventIframe("/botTeamsMgeBot/aboutBot.html")
+export class BotTeamsMgeBot extends TeamsActivityHandler {
+ ```
+
+ Cuando edites la URL en el Bot Channel Registration, asegúrate de que guardas los cambios :)
+
+ Ahora sí, hora de probarlo todo. Vuelve al MS Teams de tu Tenant de Office 365, clica en el botón de la messaging extension desde el chat, selecciona cualquier Team y pulsa en "Share Team". Si todo ha ido bien, verás la Adaptive Card con la info del Team. Envía el mensaje con la Card, y prueba el botón de "Jump to Team" de la Card, saltando a dicho Team.
+
+ Enhorabuena!! has completado con exito el lab, y creado tu Teams messaging extension, reutilizando gran parte de tus skills en SPFx.
+
+ ![congrats](./assets/congrats.jpg)
