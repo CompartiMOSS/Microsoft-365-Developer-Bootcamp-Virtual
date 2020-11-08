@@ -625,3 +625,24 @@ Sin embargo, si pinchamos en "Share Team", obtendremos un error, de que la App n
 Vamos a crear ese Bot!!
 
 ## Creación del Bot para nuestra Messaging Extension
+
+Podemos crear un Bot para MS Teams en diferentes lenguajes y plataformas. Quiza la mas sencilla para principiantes sea utilizar otro _generator_ de Yeoman, de nombre __Yo Teams__, que ya instalamos al principio del Lab, como parte de los pre requisitos.
+
+En una aplicacion de consola, crea una carpeta nueva a la misma altura del proyecto spfx (si seguiste los pasos iniciales, debes tener una carpeta principal llamada _mge-spfx-lab_), por ejemplo:
+
+```
+mkdir bot-teams-mge
+```
+
+Situate en esta nueva carpeta, y vamos a crear el proyecto del Bot utilizando _Yo teams_:
+
+```
+yo teams
+```
+
+Puedes dejar practicamente todos los valores sugeridos por la plantilla. El unico valor a cambiar, es el __Microsoft App ID__, que tiene que ser el App Id obtenido al registrar el __Bot Channel__. Podeis ver a cual me refiero en la imagen siguiente:
+
+![register bot 5](./assets/register-bot-5.png)
+
+![yo teams 1](./assets/yo-teams-1.png)
+
