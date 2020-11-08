@@ -784,6 +784,19 @@ export class BotTeamsMgeBot extends TeamsActivityHandler {
 
  Ahora sí, hora de probarlo todo. Vuelve al MS Teams de tu Tenant de Office 365, clica en el botón de la messaging extension desde el chat, selecciona cualquier Team y pulsa en "Share Team". Si todo ha ido bien, verás la Adaptive Card con la info del Team. Envía el mensaje con la Card, y prueba el botón de "Jump to Team" de la Card, saltando a dicho Team.
 
+ __Nota__: A no ser que tengas una licencia de pago para ngrok, cada vez que arranques ngrok con el comando de gulp, se te asignará una URL nueva, por lo que tendrás de nuevo que actualizar el Bot Channel en el portal de Azure.
+
  Enhorabuena!! has completado con exito el lab, y creado tu Teams messaging extension, reutilizando gran parte de tus skills en SPFx.
 
+ MUCHAS GRACIAS POR TU PARTICIPACIÓN!!!
+
  ![congrats](./assets/congrats.jpg)
+
+ ## Next steps
+
+ Si has llegado hasta aquí y te ha sobrado tiempo, aquí te dejo algunos ejercicios interesantes para poder profundizar:
+
+ - Mejora el webpart para que cargue las imágenes reales de los Teams, para ello tendrás que llamar a Graph para pedir la foto de cada grupo.
+ - Mejora el webpart para que haga un listado paginado de los Teams (recuerda que en el lab pedimos los primeros 20 Teams)
+ - Intenta desplegar el Bot en una Web App de Azure, y así no tendrás que utilizar ngrok. El generador de Yo Teams ha creado un fichero en __bot-teams-mge\README.md__ con una sección que explica como desplegar en una Azure WebApp desde un repositorio Git local. Si no te funciona, no te vuelvas muy loco, porque he visto algún _issue_ en el github de Yo Teams, y parece que ese proceso y documento va a ser ajustado para la última version del generador.
+ - Practica con otros tipos de Adaptive Card y saca más información del Team, como puede ser los _Members_
