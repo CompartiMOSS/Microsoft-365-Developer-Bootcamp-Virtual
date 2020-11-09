@@ -40,9 +40,9 @@ gulp trust-dev-cert
 
 Posteriormente ejecutaremos el proyecto con el siguiente comando:
 
-    ```shell
-    gulp serve
-    ```
+```shell
+gulp serve
+```
 
 La tarea _serve_ de Gulp lo que hará será ejecutar el proyecto, arrancando un servidor web local y abriendo un navegador con el Workbench de SharePoint:
 
