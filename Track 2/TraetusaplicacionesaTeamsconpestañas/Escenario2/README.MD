@@ -504,5 +504,84 @@ export const avengerAPI = {
     getAvengersAsync  
 }
 ```
+Ahora empezaremos a crearnos unos Hooks para tener nuestras llamadas a la API. Para ello nos crearemos una carpeta Hooks, con una subcarpeta custom y crearemos el fichero 
+useAvengersCollection.tsx
+```typescript
+import * as React from 'react';
+import { avengerAPI } from '../../api';
 
+export const useAvengerCollection = () => {
+    const [avengerCollection, setAvengerCollection] = React.useState([]);  
+    const loadAvengers = () => {         
+        avengerAPI.getAvengersAsync()
+          .then(json => setAvengerCollection(json));
+    };
+      return {avengerCollection, loadAvengers, setAvengerCollection};
+};
+```
+Ahora nos crearemos un componente que hará uso de este Hook Custom que hemos creado
+```typescript
+import * as React from 'react';
+import IAvengers from '../model/iavengers';
+import { useAvengerCollection } from './custom/useAvengersCollection';
 
+export const LoadListComponent = () => {                
+
+    const {avengerCollection, loadAvengers} = useAvengerCollection();    
+    const [filter,setFilter]= React.useState('');        
+    React.useEffect(() => {                    
+        loadAvengers();
+    },[avengerCollection.length]);
+     
+        let i:number=0;   
+        const avengerFilter:IAvengers[]=  avengerCollection.filter(x=>x.name.toString().search(filter)===0);
+return (
+
+<div className="container">
+<div className="row">
+<div className="col-lg-12 my-3">
+            <div className="pull-right">
+                <div className="btn-group">    
+                </div>
+            </div>
+        </div>
+    </div> 
+    <div className="col-md-6 col-md-offset-3">
+                <div className="well well-sm">
+                    <div className="form-group">
+                        <label className="col-md-3 control-label" htmlFor="name">Buscar</label>
+                        <div className="col-md-9">
+                            <input id="name" name="name" type="text" placeholder="Name Avenger" onChange={(value)=>{setFilter(value.target.value)}} className="form-control"/>
+                        </div>
+                    </div>
+                </div>
+    </div>
+    <div id="products" className="row view-group">
+        {            
+            avengerFilter.map((item:IAvengers)=>{
+                i=i+1;                
+                return (
+                    <div className="item col-xs-4 col-lg-4" key={item.id}>
+                    <div className="thumbnail card">
+                        <div className="img-event">
+                            <img className="group list-group-image img-fluid" src={item.image} alt="" />
+                        </div>
+                        <div className="caption card-body">
+                            <h4 className="group card-title inner list-group-item-heading">
+                                {item.name}</h4>
+                            <p className="group inner list-group-item-text">
+                                {item.description}
+                            </p>
+                            <div className="row">                                
+                                <div className="col-xs-12 col-md-6">                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>                );                
+            })
+        } 
+   </div>                    
+</div>)
+    }
+```
