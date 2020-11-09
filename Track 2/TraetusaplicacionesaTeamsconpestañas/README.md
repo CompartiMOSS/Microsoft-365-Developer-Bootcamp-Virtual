@@ -1,5 +1,9 @@
 # Trae tus aplicaciones a Teams con pestañas (M365 Dev Bootcamp 2020 Virtual)
 
+## Ponentes
+1. Robert Bermejo - Azure MVP [@robertbemejo](https://twitter.com/robertbemejo)
+2. Adrián Díaz - MS Office Development MVP [@AdrianDiaz81](https://twitter.com/AdrianDiaz81)
+
 En este laboratorio, vamos a ver como podemos a traer tus aplicaciones a Teams mediante pestañas.
 
 ## Indice
@@ -26,7 +30,6 @@ Para completar el laboratorio, se requiere (recomendamos acudir al lab con esto 
 - Suscripción de Azure con usuario Administrador de la misma
 - Tenant de Office 365 con usuario Administrador de la misma
 - Prepara tu Tenant para Teams development. Sigue estos pasos: [https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/prepare-your-o365-tenant](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/prepare-your-o365-tenant)
-- SPFx dev enviroment actualizado a la última versión (follow steps here: [https://docs.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-development-environment](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-development-environment))
 - [ngrok](https://ngrok.com/) instalado y configurado. Sigue estos pasos:
     - Crea una cuenta en la web de ngrok (es gratis)
     - Instala ngrok usando npm: 
