@@ -1,0 +1,58 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0",
+  "id": "[botId]",
+  "packageName": "com.teams.sample.linkunfurling",
+  "developer": {
+    "name": "M365 Developer Bootcamp Spain",
+    "websiteUrl": "https://www.spsevents.org/event/madrid2020/",
+    "privacyUrl": "https://www.spsevents.org/event/madrid2020/",
+    "termsOfUseUrl": "https://www.spsevents.org/event/madrid2020/"
+  },
+  "icons": {
+    "color": "icon-color.png",
+    "outline": "icon-outline.png"
+  },
+  "name": {
+    "short": "tvmaze-extension",
+    "full": "TV Maze Teams Search Extension"
+  },
+  "description": {
+    "short": "TV Maze Search Messaging Extension",
+    "full": "Sample Search Messaging Extension Bot to search for shows and movies using TV Maze API"
+  },
+  "accentColor": "#FFFFFF",
+  "composeExtensions": [
+    {
+      "botId": "[botId]",
+      "commands": [
+        {
+          "id": "searchQuery",
+          "context": [ "compose" ],
+          "description": "TV Maze search",
+          "title": "Search for shows",
+          "type": "query",
+          "parameters": [
+            {
+              "name": "searchQuery",
+              "title": "Search Query",
+              "description": "Your search query",
+              "inputType": "text"
+            }
+          ]
+        }
+      ],
+      "messageHandlers": [
+        {
+          "type": "link",
+          "value": {
+            "domains": [
+              "*.tvmaze.com"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

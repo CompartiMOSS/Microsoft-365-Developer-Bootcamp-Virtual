@@ -1,0 +1,83 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.5/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.5",
+  "version": "1.0",
+  "id": "[botId]",
+  "packageName": "com.microsoft.teams.teamsmessagingextensionsaction",
+  "developer": {
+    "name": "Virtual Summit 2020",
+    "websiteUrl": "https://www.spsevents.org/event/madrid2020",
+    "privacyUrl": "https://www.spsevents.org/event/madrid2020",
+    "termsOfUseUrl": "https://www.spsevents.org/event/madrid2020"
+  },
+  "name": {
+    "short": "Demo 1 Virtual Summit 2020",
+    "full": "Microsoft Teams Action Based Messaging Extension to check sentiment"
+  },
+  "description": {
+    "short": "Sample demonstrating an Action Based Messaging Extension",
+    "full": "Sample Action Messaging Extension built with the Bot Builder SDK"
+  },
+  "icons": {
+    "outline": "icon-outline.png",
+    "color": "icon-color.png"
+  },
+  "accentColor": "#FFFFFF",
+  "bots": [
+    {
+      "botId": "[botId]",
+      "scopes": [
+        "personal",
+        "groupchat",
+        "team"
+      ],
+      "supportsFiles": false,
+      "isNotificationOnly": false
+    }
+  ],
+  "composeExtensions": [
+    {
+      "botId": "[botId]",
+      "canUpdateConfiguration": true,
+      "commands": [
+        {
+          "id": "dailySentiment",
+          "type": "action",
+          "context": [
+            "compose"
+          ],
+          "description": "Check sentiment from Compose Box",
+          "title": "Feeling",
+          "parameters": [
+            {
+              "name": "text",
+              "title": "I feel",
+              "description": "How do I feel",
+              "inputType": "text"
+            }
+          ]
+        },
+        {
+          "id": "checkSentiment",
+          "type": "action",
+          "context": [
+            "message"
+          ],
+          "description": "Check sentiment on message context",
+          "title": "Check sentiment",
+          "parameters": [
+            {
+              "name": "showImage",
+              "title": "Include Image",
+              "description": "Include image in Hero Card",
+              "inputType": "toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "identity"
+  ]
+}
