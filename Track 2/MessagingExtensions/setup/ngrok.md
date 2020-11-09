@@ -9,7 +9,7 @@ Una vez descargado ejecuta los siguientes pasos para ejecutarlo:
 
 1. Al crear la solución con Visual Studio por defecto le asigna el puerto 3978, puedes comprobarlo dentro de las propiedades del proyecto, en la pestaña Depurar
 
-    ![Ver el puerto en Visual studio](/setup/resources/ngrok-02.png)
+    ![Ver el puerto en Visual studio](./resources/ngrok-02.png)
 
 1. Ejecute el siguiente comando reemplazando [port] con el puerto de la URL de la aplicación
 
@@ -17,7 +17,7 @@ Una vez descargado ejecuta los siguientes pasos para ejecutarlo:
     ngrok http -host-header=rewrite [port] 
     ```
 
-    ![Resultado de la ejecución ngrok](/setup/resources/ngrok-01.png)
+    ![Resultado de la ejecución ngrok](./resources/ngrok-01.png)
 
 
 1. La aplicación ngrok mostrará en la consola información. Tome nota de la dirección de reenvío utilizando https. Esta dirección es necesaria en los siguientes pasos.

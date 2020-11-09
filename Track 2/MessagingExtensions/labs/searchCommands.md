@@ -4,11 +4,11 @@ En este laboratorio vamos a ver como crear comandos de búsqueda para la extensi
 
 - En el primer ejemplo vamos a crear una busqueda que utilizará una api externa
 
-    ![Demo compose](/labs/resources/searchCommandSummary-01.png)
+    ![Demo compose](./resources/searchCommandSummary-01.png)
 
 - En el segundo ejemplo vamos a ver como crear tarjetas personalizadas cuando en el mensaje introducimos una url
 
-    ![Demo message](/labs/resources/searchCommandSummary-02.png)
+    ![Demo message](./resources/searchCommandSummary-02.png)
 
 
 ## Creando la solución en Visual Studio
@@ -17,11 +17,11 @@ En este laboratorio vamos a ver como crear comandos de búsqueda para la extensi
 
 1. Crea un proyecto con la plantilla "Echo Bot(Bot Framework v4 - .NET Core 3.1)
 
-    ![Crear un proyecto de Visual Studio](/labs/resources/actionCommand-01.png)
+    ![Crear un proyecto de Visual Studio](./resources/actionCommand-01.png)
 
 1. Añade el nombre del proyecto, la ubicación y el nombre de la solución
 
-    ![Configuración del proyecto](/labs/resources/actionCommand-02.png)
+    ![Configuración del proyecto](./resources/actionCommand-02.png)
 
 1. Abre el fichero appsetings.json e introduce los valores del registro del bot en Azure
 

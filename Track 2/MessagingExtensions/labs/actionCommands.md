@@ -6,11 +6,11 @@ En este laboratorio vamos a ver como crear comandos de acción para la extensió
 
 - En el primer ejemplo vamos a crear un comando que podamos ejecutar al crear un mensaje, nos pida un valor y nos muestre el resultado de la ejecución.
 
-    ![Demo compose](/labs/resources/actionCommandSummary-01.png)
+    ![Demo compose](./resources/actionCommandSummary-01.png)
 
 - En el segundo ejemplo vamos a ver como crear un comando que podamos ejecutar a un mensaje que ya exista dentro de la conversación
 
-    ![Demo message](/labs/resources/actionCommandSummary-02.png)
+    ![Demo message](./resources/actionCommandSummary-02.png)
 
 ## Creando un servicio cognitivo en Azure
 
@@ -20,23 +20,23 @@ Nuestro proyecto va a utilizar el servicio de analisis de sentimiento de Azure, 
 
 1. Añade un nuevo recurso desde la home
 
-    ![Nuevo recurso desde la home](/labs/resources/actionCommandCognitive-01.png)
+    ![Nuevo recurso desde la home](./resources/actionCommandCognitive-01.png)
 
     También puedes hacerlo desde el grupo de recursos donde quieres crearlo
 
-    ![Nuevo recurso desde el grupo de recursos](/labs/resources/actionCommandCognitive-02.png)
+    ![Nuevo recurso desde el grupo de recursos](./resources/actionCommandCognitive-02.png)
 
 1. Selecciona Cognitive Services
 
 1. Selecciona el grupo de recursos, región, nombre y el plan de precios
 
-    ![Creando el servicio cognitivo](/labs/resources/actionCommandCognitive-03.png)
+    ![Creando el servicio cognitivo](./resources/actionCommandCognitive-03.png)
 
 1. Crea el recurso pulsando Review + Create y luego Create
 
 1. Una vez creado el recurso necesitaremos 2 valores que tendremos que introducir en nuestra solución, el endpoint y una key. Los dos valores los podemos ver dentro de la pestaña Keys and Endpoint
 
-    ![Cognitive service endpoint](/labs/resources/actionCommandCognitive-04.png)
+    ![Cognitive service endpoint](./resources/actionCommandCognitive-04.png)
 
 ## Creando la solución en Visual Studio
 
@@ -44,11 +44,11 @@ Nuestro proyecto va a utilizar el servicio de analisis de sentimiento de Azure, 
 
 1. Crea un proyecto con la plantilla "Echo Bot(Bot Framework v4 - .NET Core 3.1)
 
-    ![Crear un proyecto de Visual Studio](/labs/resources/actionCommand-01.png)
+    ![Crear un proyecto de Visual Studio](./resources/actionCommand-01.png)
 
 1. Añade el nombre del proyecto, la ubicación y el nombre de la solución
 
-    ![Configuración del proyecto](/labs/resources/actionCommand-02.png)
+    ![Configuración del proyecto](./resources/actionCommand-02.png)
 
 1. Abre el fichero appsetings.json e introduce los valores del registro del bot en Azure
 
@@ -85,7 +85,7 @@ Nuestro proyecto va a utilizar el servicio de analisis de sentimiento de Azure, 
 
 1. En Dependencias, añade el paquete de Nuget Azure.AI.TextAnalytics
 
-    ![Paquete Nuget](/labs/resources/actionCommandService-01.png)
+    ![Paquete Nuget](./resources/actionCommandService-01.png)
 
 1. Modifica el fichero appsettings.json para incluir la configuración del servicio cognitivo. El fichero tiene que quedar de esta forma
 

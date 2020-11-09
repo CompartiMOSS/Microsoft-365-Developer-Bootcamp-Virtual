@@ -14,14 +14,14 @@
 
 Antes de empezar el workshop vamos a ver un par de configuraciones que utilizaremos dentro de los laboratorios
 
-1. [ngrok](/setup/ngrok.md)
-1. [Registrar el bot en Azure](/setup/botRegister.md)
-1. [Subir la aplicación a Microsoft Teams](/setup/teamsLoading.md)
+1. [ngrok](./setup/ngrok.md)
+1. [Registrar el bot en Azure](./setup/botRegister.md)
+1. [Subir la aplicación a Microsoft Teams](./setup/teamsLoading.md)
 
 ## Los laboratorios
 
-1. [Action commands](/labs/actionCommands.md)
-1. [Search commands](/labs/searchCommands.md)
+1. [Action commands](./labs/actionCommands.md)
+1. [Search commands](./labs/searchCommands.md)
 
 ---
 
