@@ -476,12 +476,15 @@ const getAvengersAsync = async (): Promise<IAvengers[]> => {
     const requestParams = {
             headers:
              { 
-                 'Content-Type': 'application/json'           
-              } ,    
-              method: 'GET',
-              mode: 'same-origin' as RequestMode                  
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'                        
+              },    
+              mode: 'cors' as RequestMode,               
+              method:'GET'           
           };
+    
     const response = await pnp.fetch(addManagedURL, requestParams);        
+    debugger;
     const responseOne = await (response.json());
     return mapToAvengers(responseOne);    
 }
@@ -585,3 +588,115 @@ return (
 </div>)
     }
 ```
+A continuación nos creamos un componente Layout.tsx dentro de la carpeta layout.tsx en la que tendrá el siguiente contenido.
+```typescript
+import * as React from 'react';
+export interface ILayoutProps {
+    children?: React.ReactNode;
+}
+export class Layout extends React.Component<ILayoutProps> {
+    public render() {
+        return (
+            <div>
+                <div>
+                     {this.props.children} 
+                </div>
+            </div>
+        );
+    }
+}
+```
+Continuaremos creando las rutas de nuestra app, para ello en la raiz nos crearemos un fichero de Routes con el siguiente contenido.
+```typescript
+import * as React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import { Layout } from './components/layout';
+import { LoadListComponent } from './hooks/listAvengersHooks';
+import { withAuth } from './security/hoc/security';
+
+export const routes =
+    <Switch>       
+        <Layout>
+            <Switch>
+            <Route exact={true} path='/' component={withAuth(LoadListComponent)} />            
+            </Switch>
+        </Layout>
+    </Switch>;
+```
+
+Luego ya nos queda por poner el index.tsx y añadimos el siguiente código 
+```typescript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AppContainer } from 'react-hot-loader';
+import { BrowserRouter } from 'react-router-dom';
+import './index.css';
+import reportWebVitals from './reportWebVitals';
+import { initializeIcons } from '@uifabric/icons';
+import * as RoutesModule from './routes';
+import { AuthenticationParameters } from 'msal';
+import { Providers, SimpleProvider, ProviderState } from '@microsoft/mgt';
+import { msalInstance } from './security/msal/msal';
+
+const routes = RoutesModule.routes;
+
+declare global {
+  /* eslint-disable-next-line */
+  namespace JSX {
+      interface IntrinsicElements {
+          'mgt-flyout':any;
+          'mgt-login': any;
+          'mgt-person': any;
+          'mgt-msal-provider': any;
+          'mgt-tasks': any;
+          'mgt-people-picker': any;
+          'mgt-person-card': any;
+          'person': any;
+      }
+  }
+}
+Providers.globalProvider = new SimpleProvider(async (scopes) => {
+  const request: AuthenticationParameters = {  };
+    request.scopes = scopes;
+    console.log(scopes);
+		return msalInstance.acquireTokenSilent(request).then((response) => {
+			return response.accessToken;
+		});
+
+});
+Providers.globalProvider.setState(ProviderState.Loading);
+function renderApp() {
+  initializeIcons(undefined, { disableWarnings: true });
+
+  ReactDOM.render(
+    <AppContainer>      
+        <BrowserRouter basename={process.env.PUBLIC_URL}>          
+          {routes}          
+        </BrowserRouter>      
+    </AppContainer>,
+    document.getElementById('root')
+  );
+}
+
+renderApp();
+reportWebVitals();
+```
+
+Como podeis ver hemos configurado en la aplicación un SimpleProvider para que funcione con Graph Toolkit, ahora como lo integramos en nuestro aplicación nos vamos al hook listAvengersHook.tsx y añadimos la referencia al componente mgt-person quedando de la siguiente forma
+```typescript
+...
+<div className="container">
+<mgt-person person-query='me' show-name show-email ></mgt-person>
+<div className="row">
+...
+```
+
+Si ahora arrancamos la aplicación Web con el siguiente comando
+```bash
+npm run build
+```
+Si todo ha ido bien tendremos que visualizaremos la siguiente pantalla 
+![modoHulk](./assets/img/Front.PNG)  
+
+
+
