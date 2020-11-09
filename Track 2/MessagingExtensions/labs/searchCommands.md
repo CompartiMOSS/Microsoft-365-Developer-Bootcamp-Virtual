@@ -335,69 +335,69 @@ En este laboratorio vamos a ver como crear comandos de búsqueda para la extensi
 
     ```
     {
-  "type": "AdaptiveCard",
-  "body": [
-    {
-      "type": "TextBlock",
-      "size": "ExtraLarge",
-      "weight": "Bolder",
-      "text": "${name}",
-      "wrap": true,
-      "color": "Accent"
-    },
-    {
-      "type": "ColumnSet",
-      "columns": [
+    "type": "AdaptiveCard",
+    "body": [
         {
-          "type": "Column",
-          "items": [
-            {
-              "type": "Image",
-              "style": "Person",
-              "url": "${image.medium}",
-              "size": "Small",
-              "width": "166px"
-            }
-          ],
-          "width": "auto"
+        "type": "TextBlock",
+        "size": "ExtraLarge",
+        "weight": "Bolder",
+        "text": "${name}",
+        "wrap": true,
+        "color": "Accent"
         },
         {
-          "type": "Column",
-          "items": [
+        "type": "ColumnSet",
+        "columns": [
             {
-              "type": "TextBlock",
-              "weight": "Bolder",
-              "text": "${name}",
-              "wrap": true
+            "type": "Column",
+            "items": [
+                {
+                "type": "Image",
+                "style": "Person",
+                "url": "${image.medium}",
+                "size": "Small",
+                "width": "166px"
+                }
+            ],
+            "width": "auto"
             },
             {
-              "type": "TextBlock",
-              "spacing": "None",
-              "text": "${language}",
-              "isSubtle": true,
-              "wrap": true
+            "type": "Column",
+            "items": [
+                {
+                "type": "TextBlock",
+                "weight": "Bolder",
+                "text": "${name}",
+                "wrap": true
+                },
+                {
+                "type": "TextBlock",
+                "spacing": "None",
+                "text": "${language}",
+                "isSubtle": true,
+                "wrap": true
+                }
+            ],
+            "width": "stretch"
             }
-          ],
-          "width": "stretch"
+        ]
+        },
+        {
+        "type": "TextBlock",
+        "text": "${summary}",
+        "wrap": true
         }
-      ]
-    },
-    {
-      "type": "TextBlock",
-      "text": "${summary}",
-      "wrap": true
+    ],
+    "actions": [
+        {
+        "type": "Action.OpenUrl",
+        "title": "Official site",
+        "url": "${officialSite}"
+        }
+    ],
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.2"
     }
-  ],
-  "actions": [
-    {
-      "type": "Action.OpenUrl",
-      "title": "Official site",
-      "url": "${officialSite}"
-    }
-  ],
-  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-  "version": "1.2"
-}
     ```
 
 ## Creando el paquete de la solución

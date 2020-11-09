@@ -23,13 +23,13 @@
 1. Cuando finalice la implementación, navegue hasta el recurso en el portal de Azure. En la parte izquierda de la navegación, seleccione Todos los recursos. En la pestaña Todos los recursos, seleccione el Registro de Canales Bot.
 
 1. En la sección Administración de bots, seleccione Canales.
-    ![alt text](./resources/registerbot-01.png "Text")
+    ![alt text](./resources/registerbot-01.png)
 
 1. Haga clic en el logotipo de Microsoft Teams para crear una conexión con Teams. Seleccione Guardar. Acepta los Términos de Servicio.
-    ![alt text](./resources/registerbot-02.png "Text")
+    ![alt text](./resources/registerbot-02.png)
 
 1. En la pestaña de Registro de Canales Bot, seleccione Configuración en Administración de Bots.
-     ![alt text](./resources/registerbot-03.png "Text")
+     ![alt text](./resources/registerbot-03.png)
 
 1. Se muestra el Id. de la aplicación de Microsoft. Copia este valor.
 
@@ -42,7 +42,7 @@
 1. Introduzca una descripción y seleccione un intervalo de caducidad. Seleccione Añadir.
 
 1. Se crea y muestra un nuevo secreto. Graba el nuevo secreto.
-    ![alt text](./resources/registerbot-04.png "Text")
+    ![alt text](./resources/registerbot-04.png)
 
 1. Una vez que tengamos el clientId y clientSecret lo añadimos en nuestro proyecto de Visual Studio dentro del fichero appsettings.json
 ```
