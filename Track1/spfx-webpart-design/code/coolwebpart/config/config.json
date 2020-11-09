@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "cool-web-part-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/coolWebPart/CoolWebPartWebPart.js",
+          "manifest": "./src/webparts/coolWebPart/CoolWebPartWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "CoolWebPartWebPartStrings": "lib/webparts/coolWebPart/loc/{locale}.js"
+  }
+}

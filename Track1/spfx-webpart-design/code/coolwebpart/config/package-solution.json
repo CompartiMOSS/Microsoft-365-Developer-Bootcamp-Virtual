@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "coolwebpart-client-side-solution",
+    "id": "66ff9b19-2201-4646-9b6c-2c9c6cb7f374",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "isDomainIsolated": false
+  },
+  "paths": {
+    "zippedPackage": "solution/coolwebpart.sppkg"
+  }
+}
