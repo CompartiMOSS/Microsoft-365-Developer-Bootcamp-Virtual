@@ -135,7 +135,374 @@ Si ahora arrancamos nuestra aplicación deberiamos de visualizar lo siguiente:
 
 Una vez ya tenemos nuestro desarrollo funcionando lo que debemos de hacer es securizar nuestra API para ello tendremos que hacer lo siguiente:
 
+Nos creamos una carpeta "Infraestructure" y una subcarpeta "Extensions" y nos creamos los siguientes ficheros.
+
+AzureAdServiceCollectionExtensions.cs
+```csharp
+namespace Microsoft.AspNetCore.Authentication
+{
+    using bootcamp365.Infraestructure.Extensions;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
+    using System;
+    public static class AzureAdServiceCollectionExtensions
+    {
+        public static AuthenticationBuilder AddAzureAdBearer(this AuthenticationBuilder builder)
+            => builder.AddAzureAdBearer(_ => { });
+        public static AuthenticationBuilder AddAzureAdBearer(this AuthenticationBuilder builder, Action<AzureAdOptions> configureOptions)
+        {
+            builder.Services.Configure(configureOptions);
+            builder.Services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureAzureOptions>();
+            builder.AddJwtBearer();
+            return builder;
+        }
+        private class ConfigureAzureOptions : IConfigureNamedOptions<JwtBearerOptions>
+        {
+            private readonly AzureAdOptions _azureOptions;
+            public ConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
+            {
+                _azureOptions = azureOptions.Value;
+            }
+            public void Configure(string name, JwtBearerOptions options)
+            {
+                options.Audience = _azureOptions.ClientId;
+                options.Authority = $"{_azureOptions.Instance}{_azureOptions.TenantId}";
+            }
+            public void Configure(JwtBearerOptions options)
+            {
+                Configure(Options.DefaultName, options);
+            }
+        }
+    }
+}
+```
+AzureAdOptions.cs
+```csharp
+namespace bootcamp365.Infraestructure.Extensions
+{
+    public class AzureAdOptions
+    {
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
+        public string Instance { get; set; }
+        public string Domain { get; set; }
+        public string TenantId { get; set; }
+    }
+}
+```
+
+A continuación dentro de la clase Startup en el método ConfigureServices añadimos en la primera linea 
+```csharp
+services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+              .AddAzureAdBearer(options => Configuration.Bind("AzureAd", options));
+```
+ y en el método Configure antes del método UseAuthorization añadimos el método UseAuthentication quedando de la siguiente forma
+ ```csharp
+ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+```
+Ahora habilitaremos el cors para que desde la parte Front se pueda consultar sin ningun tipo de problema. Para ello al igual que hemos realizado en el anterior punto tenemos que modificar Startup en el método ConfigureServices 
+```csharp
+    services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                    });
+            });
+```
+y el método Configure
+
+```csharp
+  app.UseCors();
+```
+Ahora en el fichero de "app.settings" añadiremos la siguiente configuración
+```json
+ "AzureAd": {
+    "ClientId": "",
+    "Domain": "",
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "",
+    "CallbackPath": "/signin-oidc",
+    "ClientSecret": "",
+    "AppIDURL": "",
+    "ConfigView": "MVC"
+  }
+```
+Toda esta información la debemos de obtener del registro de la aplicación que hemos realizado en el punto anterior.
+
+Si ahora lo ejecutamos nos devolverá un bonito Unathorize
+![unauthorize](./assets/img/Unauthorize.PNG)  
+
+Para comprobar si nuestra API bien podemos hacer uso de Postman o de configurar Swagger aqui os dejo unos enlaces de como poder hacerlo:
+https://medium.com/@dineshbalani/authenticate-swagger-ui-against-azure-active-directory-in-asp-net-core-web-api-project-f0380dfe69ca 
+
+https://liupeirong.github.io/postmanAzureFunctions/
 
 
+Posteriormente tendremos que hacer algun endpoint extra ... pero lo dejamos para más adelante
+
+# Creación del Front 
+
+En primer lugar tenemos que tener instala la aplicación create-react-app para ello tendremos que ejecutar el siguiente script
+```bash
+npm install -g create-react-app
+```
+Si alguien ya lo tenia instalado recomdamos hacer un unnistall del create-react y ejecutar otra vez el comando.
+A continuación nos creamos la base del proyecto para ello ejecutamos la siguiente instrucción
+```bash
+npx create-react-app bootcamp --template typescript
+```
+
+Una vez creado el proyecto reemplazamos el contenido del package.json por el siguiente 
+```json
+{
+  "name": "bootcamp",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fluentui/react": "7.117.0",    
+    "@microsoft/teams-js": "1.6.0",
+    "@pnp/common": "1.3.2",
+    "@testing-library/jest-dom": "4.2.4",
+    "@testing-library/react": "9.3.2",
+    "@testing-library/user-event": "7.1.2",
+    "@types/i18n": "0.8.6",
+    "@types/i18n-js": "3.0.1",
+    "@types/jest": "24.0.0",
+    "@types/node": "12.0.10",
+    "@types/node-sass": "4.11.0",
+    "@types/react": "16.9.0",
+    "@types/react-dom": "16.9.0",
+    "@types/react-hot-loader": "4.1.0",
+    "@types/react-redux": "7.1.0",
+    "@types/react-router-dom": "4.3.4",
+    "@types/redux": "3.6.0",
+    "@types/redux-thunk": "2.1.0",
+    "@uifabric/icons": "7.1.0",
+    "@webcomponents/webcomponentsjs": "2.2.10",
+    "bootstrap": "4.4.1",
+    "dom-to-image": "2.6.0",
+    "i18next": "19.3.2",
+    "i18next-browser-languagedetector": "4.0.2",
+    "msal": "1.2.1",
+    "node-sass": "4.13.1",
+    "querystring": "0.2.0",
+    "react": "16.12.0",
+    "react-bootstrap": "1.0.0-beta.16",
+    "react-butterfiles": "1.3.3",
+    "react-circular-progressbar": "2.0.3",
+    "react-dom": "16.12.0",
+    "react-hot-loader": "4.11.1",
+    "react-i18next": "9.0.10",
+    "react-redux": "7.1.0",
+    "react-router": "5.0.1",
+    "react-router-dom": "5.0.1",
+    "react-scripts": "3.0.1",
+    "redux": "4.0.3",
+    "redux-devtools-extension": "2.13.8",
+    "redux-logger": "3.0.6",
+    "redux-thunk": "2.3.0",
+    "survey-react": "1.1.31",
+    "toastr": "2.1.4",
+    "typescript": "~3.7.2"
+  },
+  "scripts": {
+    "start": "env-cmd -e LOCAL react-scripts start",
+    "build": "env-cmd -e LOCAL react-scripts build",    
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@microsoft/mgt": "1.3.0",
+    "@types/redux-logger": "3.0.7",
+    "@types/toastr": "^2.1.38",
+    "env-cmd": "10.0.1",
+    "mgt-react": "1.3.0-preview.2",
+    "react-app-polyfill": "1.0.6",
+    "webpack": "4.29.6"
+  }
+}
+```
+A continuación crearemos el fichero de variables para ello en la raiz del proyecto crearemos un fichero .env-cmdrc.json que tendra el siguiente contenido
+```json
+{
+    "LOCAL": {
+      "REACT_APP_ENVIRONMENT": "LOCAL",
+      "REACT_APP_MSALAUTHORITY": "https://login.microsoftonline.com/common",
+      "REACT_APP_MSALCLIENTID": "",
+      "REACT_APP_MSALCLIENTID_URI": "",
+      "REACT_APP_API": "https://localhost:44399"      
+    }
+}
+```
+Donde el MSALClientId y el MSALClientId_Uri son los datos que hemos obtenido en el registro de la applicación.
+
+Ahora modificaremos el tsconfig para poder añadir tipos any y simplificar un poco el desarrollo. Para ello dentro de la opcion de strict que inicialmente esta a true la ponemos a false.
+
+A continuación nos creamos una carpeta security donde vamos a tener configurado Msal. Para ello dentro de security tendremos tres subcarpetas (hoc,login y msal)
+Dentro de msal tendremos los siguientes ficheros
+msal.ts
+```typescript
+import { UserAgentApplication, AuthenticationParameters } from 'msal';
+import { BearerTokenFetchClient, FetchOptions, isUrlAbsolute } from '@pnp/common';
+import { msalConfig } from './msalConfig';
+
+export const msalInstance = new UserAgentApplication(msalConfig);
+export class PnPFetchClient extends BearerTokenFetchClient {
+  constructor(private authContext: UserAgentApplication) {
+    super(null);
+  }
+
+  public async fetch(url: string, options: FetchOptions = {}): Promise<Response> {
+    if (!isUrlAbsolute(url)) {
+      throw new Error('You must supply absolute urls to PnPFetchClient.fetch.');
+    }
+    let token="";
+
+    token= await this.getToken(this.getResource(url));
+    
+    return super.fetch(url, options);
+  }
+ 
+  private async getToken(resource: string): Promise<string> {
+    const request: AuthenticationParameters = {
+    };
+    request.scopes = [process.env.REACT_APP_MSALCLIENTID];    
+    if (resource.indexOf('graph') !== -1) {
+      request.scopes = ["User.Read.All"];
+    }
+    try {
+      const response = await this.authContext.acquireTokenSilent(request);
+      return response.accessToken;
+    } catch (error) {
+      if (this.requiresInteraction(error.errorCode)) {
+        this.authContext.loginRedirect(request);
+      } else {
+        throw error;
+      }
+    }
+  }
+ 
+  private requiresInteraction(errorCode: string) {
+    if (!errorCode || !errorCode.length) {
+      return false;
+    }
+    return errorCode === "consent_required" ||
+      errorCode === "interaction_required" ||
+      errorCode === "login_required";
+  }
+
+  private getResource(url: string): string {
+    const parser = document.createElement('a');
+    parser.href = url;
+    return `${parser.protocol}//${parser.hostname}`;
+  }
+
+}
+```
+msalConfig.ts
+```typescript
+export const msalAuthConfig = {
+	authority: process.env.REACT_APP_MSALAUTHORITY,
+	clientId: process.env.REACT_APP_MSALCLIENTID,
+	postLogoutRedirectUri: window.location.origin
+}
+export const msalCacheConfig = {
+	storeAuthStateInCookie: true,
+	CacheLocation: 'localStorage'
+};
+export const msalConfig = {
+	auth: msalAuthConfig,
+	cache: msalCacheConfig
+};
+```
+
+Una vez ya lo tenemos vamos a crearnos el modelo de los Avengers. En la carpeta de model nos creamos la siguiente interface
+iavengers.ts
+```typescript
+export default interface IAvengers {
+    id:string
+    name:string;
+    description:string;
+    image:string;    
+    }
+```
+Con el modelo ya creado nos crearemos la llamada a la API que vamos a realizar, por eso en la carpeta API nos creamos un fichero index.ts donde tendremos las llamadas a la API implementada en el primer punto.
+index.ts
+```typescript
+import IAvengers from '../model/iavengers';
+import { msalInstance } from '../security/hoc/security';
+import { PnPFetchClient } from '../security/msal/msal';
+
+const baseURL = process.env.REACT_APP_API + '/api';
+
+const getAvengersAsync = async (): Promise<IAvengers[]> => {
+    const addManagedURL =`${baseURL}/avengers`;
+    const pnp = new PnPFetchClient(msalInstance);    
+    const requestParams = {
+            headers:
+             { 
+                 'Content-Type': 'application/json'           
+              } ,    
+              method: 'GET',
+              mode: 'same-origin' as RequestMode                  
+          };
+    const response = await pnp.fetch(addManagedURL, requestParams);        
+    const responseOne = await (response.json());
+    return mapToAvengers(responseOne);    
+}
+
+const mapToAvengers = (response:any): IAvengers[] => {
+    const result: IAvengers[] = [];
+    response.map((item:any) => {
+        const avengerMap: IAvengers = {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            image: item.urlPhoto  
+        };
+        result.push(avengerMap);
+    });
+    return result;
+}
+
+export const avengerAPI = {    
+    getAvengersAsync  
+}
+```
 
 
