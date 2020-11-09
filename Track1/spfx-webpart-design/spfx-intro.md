@@ -65,3 +65,12 @@ En el panel de propiedades que se abre, modificaremos el valor del campo **Descr
 ![Screenshot of editing the web part property pane](./assets/ex01-05.png)
 
 Para finalizar, cerraremos el navegador y pararemos el servidor local pulsando <kbd>CTRL</kbd>+<kbd>C</kbd> en la consola de comandos.
+
+
+[INDEX](./readme.md)
+
+[0.- Development environment](./environment.md)
+
+1.- SPFx Webpart
+
+[2.- SPFx Design](./spfx-design.md)
