@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from '../CoolWebPart.module.scss';
+import styles from './dashboard.module.scss';
 
 interface IDashboardProps {
    saints: number;

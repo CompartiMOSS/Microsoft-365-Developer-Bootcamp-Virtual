@@ -15,12 +15,12 @@ export const Saint = (props: ISaint, key: number) => {
 
   return (
     <>
-      <li key={key} className="saint-container" style={{ backgroundImage: `url(${props.saint.picture})` }}>
+      <li key={key} style={{ backgroundImage: `url(${props.saint.picture})` }}>
         <div className={styles.saintPicture} style={{ backgroundImage: `url(${props.saint.picture})` }}></div>
         <div className={styles.saintName}>{props.saint.name}</div>
-        <div className="saint-constellation">{props.saint.constellation !== '' ? props.saint.constellation : '-' }</div>
-        <div className="saint-class">{props.saint.class}</div>
-        <div className="saint-strength"><span className={styles.galleryOnly}>Strength: </span>{props.saint.strength}</div>
+        <div>{props.saint.constellation !== '' ? props.saint.constellation : '-' }</div>
+        <div>{props.saint.class}</div>
+        <div><span className={styles.galleryOnly}>Strength: </span>{props.saint.strength}</div>
         <Rating
             min={1}
             max={5}

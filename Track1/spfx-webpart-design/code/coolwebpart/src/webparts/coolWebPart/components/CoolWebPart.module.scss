@@ -1,37 +1,6 @@
 @import '~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss';
 
-.saintsContainer {
-  .dashboard {
-    margin-bottom: 24px;
-  
-    .kpiRow {
-      display: flex;
-      flex-flow: nowrap;
-      justify-content: space-between;
-    }
-  
-    .kpiPanel {
-      flex: 1 1 auto;
-      margin: 10px;
-      padding: 12px;
-      background: rgba($color: #d4af37, $alpha: 1);
-      box-shadow: rgba($color: #333, $alpha: 0.25) 0 0 15px;
-      color: #363636;
-  
-      .kpiTitle {
-        font-size: 1.3em;
-        font-weight: 300;
-      }
-  
-      .kpiValue {
-        font-size: 2em;
-        font-weight: bold;
-        color: #2e1733;
-        text-align: center;
-      }
-    }
-  }
-  
+.saintsContainer {  
   ul {
     margin: 0;
     padding: 0;
@@ -100,19 +69,27 @@
       border-spacing: 6px;
 
       li {
-        display: table-row;
+        @include ms-Grid-row;
+        // display: table-row;
         background: none !important;
 
         > * {
-          display: table-cell;
+          // display: table-cell;
+          @include ms-Grid-col;
+          @include ms-md2;
           padding: 12px;
           height: 30px;
           line-height: 30px;
         }
 
         .saintPicture {
+          // @include ms-md1;
           width: 30px;
           background-size: cover;
+          background-repeat: no-repeat;
+          @media screen and (max-width: 600px) {
+            background-size: 30px;
+          }
         }
       }
     }

@@ -15,8 +15,8 @@ export const SaintList =  (props: IListProps) => {
     <>
       <ul className={styleViewMode}>
         <li key={-1} className={[styles.listOnly, styles.listHeader].join(' ')}>
-          <div></div>
-          <div>Saint</div>
+          <div className={styles.saintPicture}></div>
+          <div className={styles.saintName}>Saint</div>
           <div>Constellation</div>
           <div>Class</div>
           <div>Strength</div>
