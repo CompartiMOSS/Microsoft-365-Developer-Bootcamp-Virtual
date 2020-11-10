@@ -3,7 +3,7 @@
 ## Añadir modelo y origen de datos
 Aunque en la realidad los datos los deberíamos obtener desde una fuente "externa" mediante una consulta a alguna Api, en este caso para simplificar dispondremos de la colección dentro del fichero en el que declaramos el modelo.
 - Dentro de la carpeta *src/webparts* crear una subcarpeta llamada *model*
-- Crear un fichero llamado ISaints.ts o descargarlo desde [este enlace]()
+- Crear un fichero llamado ISaints.ts o descargarlo desde [este enlace](https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/blob/master/Track1/spfx-webpart-design/code/coolwebpart/src/webparts/model/ISaints.ts)
 ### En caso de haberlo creado
 - añadir las siguientes interfaces
 
@@ -236,12 +236,276 @@ interface IListProps {
 }
 ```
 ## Añadir estilos
+- Añadir el contenido del fichero CoolWebPart.module.scss de [este enlace](https://github.com/CompartiMOSS/Microsoft-365-Developer-Bootcamp-Virtual/blob/master/Track1/spfx-webpart-design/code/coolwebpart/src/webparts/coolWebPart/components/CoolWebPart.module.scss) al módulo de estilos de nuestro webpart principal.
+- Importar los estilos desde los componentes de lista y de elemento *saintList.tsx* y *saint.tsx*
+```javascript
+import styles from '../CoolWebPart.module.scss';
+```
+- En el return del componente de lista *saintList.tsx* sustituir el código por el siguiente:
+```javascript
+      <ul className={styleViewMode}>
+        <li key={-1} className={[styles.listOnly, styles.listHeader].join(' ')}>
+          <div></div>
+          <div>Saint</div>
+          <div>Constellation</div>
+          <div>Class</div>
+          <div>Strength</div>
+          <div></div>
+        </li>
+
+        {props.saints.map((item, index) => {
+          return (<Saint saint={item} key={index} />);
+        })}
+      </ul>
+```
+- En el return del componente individual *saint.tsx* sustituir el código por:
+
+```javascript
+       <li key={key} style={{ backgroundImage: `url(${props.saint.picture})` }}>
+         <div className={styles.saintPicture} style={{ backgroundImage: `url(${props.saint.picture})` }}></div>
+         <div className={styles.saintName}>{props.saint.name}</div>
+         <div>{props.saint.constellation !== '' ? props.saint.constellation : '-' }</div>
+         <div>{props.saint.class}</div>
+         <div><span className={styles.galleryOnly}>Strength: </span>{props.saint.strength}</div>
+       </li>
+```
+
+- En el método render del componente CoolWebPart.tsx, sustituir el código del return por:
+```javascript
+        <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
+          <Filter saints={this.state.saintsFiltered} handleFilter={this.FilterSaints} /> 
+          <SaintList saints={this.state.saintsFiltered} viewMode={this.state.viewMode}/>
+        </div>
+```
+
+### Añadir panel de resumen
+- Dentro de la carpeta components, crear una subcarpeta llamada *dashboard*
+- Crear fichero llamado dashboard.tsx con el siguiente contenido:
+
+```javascript
+import * as React from 'react';
+import styles from '../CoolWebPart.module.scss';
+
+interface IDashboardProps {
+   saints: number;
+   bronzeSaints: number;
+   silverSaints: number;
+   goldSaints: number;
+   legendarySaints: number;
+   strengthAvg: number;
+ }
+ 
+export const Dashboard = (props: IDashboardProps) => {
+   return (
+     <div className={styles.dashboard}>
+       <div className={styles.kpiRow}>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Saints:</div><div className={styles.kpiValue}>{props.saints}</div>
+         </div>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Strength average:</div><div className={styles.kpiValue}>{props.strengthAvg}</div>
+           </div>
+       </div>
+       <div className={styles.kpiRow}>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Bronze Saints:</div><div className={styles.kpiValue}>{props.bronzeSaints}</div>
+         </div>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Silver Saints:</div><div className={styles.kpiValue}>{props.silverSaints}</div>
+         </div>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Gold Saints:</div><div className={styles.kpiValue}>{props.goldSaints}</div>
+         </div>
+         <div className={styles.kpiPanel}>
+           <div className={styles.kpiTitle}>Legendary Saints:</div><div className={styles.kpiValue}>{props.legendarySaints}</div>
+         </div>
+       </div>
+     </div>
+   );
+ };
+```
 
 ## Añadir propiedades de configuración en modo edición
+Para modificar las propiedades que queremos mostrar en el panel de edición del Web Part, tendremos que trabajar con el fichero del contenedor del propio webpart, esto es, *CoolWebPartWebPart.tsx* y la interfaz *ICoolWebPartWebPartProps* definida al inicio del fichero.
+- En primer lugar, tenemos que añadir las propiedades a la interfaz, en este caso, título y descripción.
+```javascript
+export interface ICoolWebPartWebPartProps {
+  title: string;
+  description: string;
+  viewMode: string;
+}
+```
+- Seguidamente podremos hacer uso de estas propiedades dentro del panel que se muestra con el método *getPropertyPaneConfiguration*. En este método se definen tanto el número de paneles, como los grupos y las propiedades que contiene. Podemos jugar con las colecciones para probar la mejor distribución de las propiedades que deseamos tener en modo edición en nuestros Web Parts.  En este caso, tendremos un único panel con dos grupos de propiedades definidos tal como se muestra en el código a continuación:
+
+```javascript
+  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+    return {
+      pages: [
+        {
+          header: {
+            description: strings.PropertyPaneSettings
+          },
+          groups: [
+            {
+              groupName: strings.PropertiesGroupName,
+              groupFields: [
+                PropertyPaneTextField('title', {
+                  label: strings.TitleFieldLabel
+                }),
+                PropertyPaneTextField('description', {
+                  label: strings.DescriptionFieldLabel
+                })
+              ]
+            },
+            {
+              groupName: strings.AdvancedGroupName,
+              groupFields: [ 
+                PropertyPaneDropdown('viewMode', {
+                  label: strings.ViewModeFieldLabel,
+                  options: [
+                    {key: 'GALLERY', text: 'Gallery'},
+                    {key: 'LIST', text: 'List'}
+                  ],
+                  selectedKey: 'LIST'
+                }),
+              ]
+            },
+          ]
+        }
+      ]
+    };
+  }
+```
+
+### Añadir localización de elementos
+El código anterior nos generará error ya que aún no hemos establecido el texto localizado por idioma que se encuentra definido en los ficheros de la carpeta *loc*
+- Primero definimos los pares "clave:valor" de los textos traducidos en los ficheros javascript con el código de idioma:
+
+```javascript
+define([], function() {
+  return {
+    "PropertyPaneSettings": "Settings",
+    "PropertiesGroupName": "Properties",
+    "AdvancedGroupName": "Advanced properties",
+    "TitleFieldLabel": "Title",
+    "DescriptionFieldLabel": "Description",
+    "ViewModeFieldLabel": "View mode"
+  }
+});
+```
+- Posteriormente es necesario actualizar las propiedades localizadas en el fichero *mystrings.d.ts* que quedaría de la siguiente forma:
+
+```javascript
+declare interface ICoolWebPartWebPartStrings {
+  PropertyPaneSettings: string,
+  PropertiesGroupName: string,
+  AdvancedGroupName: string,
+  TitleFieldLabel: string,
+  DescriptionFieldLabel: string,
+  ViewModeFieldLabel: string
+}
+
+declare module 'CoolWebPartWebPartStrings' {
+  const strings: ICoolWebPartWebPartStrings;
+  export = strings;
+}
+```
 
 ## Añadir elementos de FluentUI
+Para poder sacar todo el jugo a los Web Parts, debemos hacer uso de los estilos y componentes de FluentUI, antes conocido como OfficeUI.Fabric. En nuestro caso, ya hemos hecho uso del DropDown y, como podemos ver, usar un control de FluentUI se realiza de forma sencilla, aunque siempre se puede complicar dependiendo del control y de la personalización que le queramos aplicar.
+
 ### Añadir rating
+Dado que disponemos de un valor numérico con el ratio de fuerza de cada uno de los elementos, podemos traducir esto de forma inmediata a un control de tipo rating.
+- En el componente saint.tsx, añadiremos un import para poder hacer uso del rating
+
+```javascript
+import { Rating, RatingSize, IRatingStyles } from 'office-ui-fabric-react/lib/Rating';
+```
+
+-Añadimos el control Rating como último elemento dentro del *li* con los parámetros de configuración necesarios para que se comporte como deseamos
+
+```javascript
+        <Rating
+            min={1}
+            max={5}
+            size={RatingSize.Large}
+            rating={props.saint.strength / 4.5}
+            readOnly={true}
+            ariaLabelFormat={'{0} of {1} strength level'}
+            styles={{ratingStarFront: {color: strengthColor}, ratingStarBack: {color: "#f0f0f0"}}}
+          />
+```
+
 ### Añadir barra de comandos
+Si queremos añadir un elemento de mayor complejidad y con más posibilidades de configuración, podemos optar por usar la barra de comandos que, además, puede ser bastante habitual en nuestros desarrollos si trabajamos con Web Parts que queremos que permitan la interación con los usuarios en la vista de lectura.
+- En el componente *CoolWebPart.tsx*  añadimos los import necesarios
+
+```javascript
+import { CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
+```
+
+- Dentro del método render de la clase del componente, añadirmos al inicio las siguientes constantes.
+
+```javascript
+
+    const _farItems: ICommandBarItemProps[] = [
+      {
+        key: 'tile',
+        text: 'Grid view',
+        // This needs an ariaLabel since it's icon-only
+        ariaLabel: 'Grid view',
+        iconOnly: true,
+        iconProps: { iconName: 'Tiles' },
+        onClick: () => {
+          console.log('Tiles'); 
+          console.log(this.state.viewMode);
+          if (this.state.viewMode === 'GALLERY') {
+            this.setViewMode('LIST');
+          } else { 
+            this.setViewMode('GALLERY');
+          }
+        },
+      },
+      {
+        key: 'info',
+        text: 'Info',
+        // This needs an ariaLabel since it's icon-only
+        ariaLabel: 'Info',
+        iconOnly: true,
+        iconProps: { iconName: 'Info' },
+        onClick: () => console.log('Info'),
+      },
+    ];
+```
+
+- Por último, añadimos el componente, antes del Dashboard, para que nos quede en la parte superior del Web Part.
+
+```javascript
+    return (
+      <>
+        <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
+          <CommandBar
+            items={[]}
+            overflowItems={[]}
+            farItems={_farItems}
+            ariaLabel="Use left and right arrow keys to navigate between commands"
+          />
+          <Dashboard 
+            saints={this.state.saintsFiltered.length}
+            bronzeSaints={6}
+            silverSaints={6}
+            goldSaints={12}
+            legendarySaints={6}
+            strengthAvg={getAverage(this.state.saintsFiltered)}
+          /> 
+          <Filter saints={this.state.saintsFiltered} handleFilter={this.FilterSaints} /> 
+          <SaintList saints={this.state.saintsFiltered} viewMode={this.state.viewMode}/>
+        </div>
+      </>
+    );
+```
+
+Como se puede ver, esta barra de comandos, nos permitirá cambiar entre la vista de tipo lista y la vista de tipo galería.
 
 ## ENLACES
 

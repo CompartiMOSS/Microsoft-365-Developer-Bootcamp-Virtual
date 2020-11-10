@@ -3,10 +3,7 @@ import styles from './CoolWebPart.module.scss';
 import { ICoolWebPartProps } from './ICoolWebPartProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { ISaintProps, ISaints, ISaint, saintsList } from '../../model/ISaints';
-import { Rating, RatingSize, IRatingStyles } from 'office-ui-fabric-react/lib/Rating';
-import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import { CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
-import { IButtonProps } from 'office-ui-fabric-react/lib/Button';
 import { SaintList } from './saint/saintList';
 import { Filter } from './filters/filter';
 import { Dashboard } from './dashboard/dashboard';
@@ -93,15 +90,13 @@ export default class CoolWebPart extends React.Component<ICoolWebPartProps, ICoo
         onClick: () => console.log('Info'),
       },
     ];
-    const overflowProps: IButtonProps = { ariaLabel: 'More commands' };
 
     return (
       <>
-        {/* <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
+        <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
           <CommandBar
             items={[]}
             overflowItems={[]}
-            overflowButtonProps={overflowProps}
             farItems={_farItems}
             ariaLabel="Use left and right arrow keys to navigate between commands"
           />
@@ -112,10 +107,10 @@ export default class CoolWebPart extends React.Component<ICoolWebPartProps, ICoo
             goldSaints={12}
             legendarySaints={6}
             strengthAvg={getAverage(this.state.saintsFiltered)}
-          /> */}
+          /> 
           <Filter saints={this.state.saintsFiltered} handleFilter={this.FilterSaints} /> 
           <SaintList saints={this.state.saintsFiltered} viewMode={this.state.viewMode}/>
-        {/* </div> */}
+        </div>
       </>
     );
   }
