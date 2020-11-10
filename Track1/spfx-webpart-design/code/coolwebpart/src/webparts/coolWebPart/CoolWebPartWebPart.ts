@@ -4,6 +4,7 @@ import { Version } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import {
   IPropertyPaneConfiguration,
+  PropertyPaneDropdown,
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 
@@ -12,7 +13,9 @@ import CoolWebPart from './components/CoolWebPart';
 import { ICoolWebPartProps } from './components/ICoolWebPartProps';
 
 export interface ICoolWebPartWebPartProps {
+  title: string;
   description: string;
+  viewMode: string;
 }
 
 export default class CoolWebPartWebPart extends BaseClientSideWebPart<ICoolWebPartWebPartProps> {
@@ -21,7 +24,9 @@ export default class CoolWebPartWebPart extends BaseClientSideWebPart<ICoolWebPa
     const element: React.ReactElement<ICoolWebPartProps > = React.createElement(
       CoolWebPart,
       {
-        description: this.properties.description
+        title: this.properties.title,
+        description: this.properties.description,
+        viewMode: this.properties.viewMode
       }
     );
 
@@ -41,17 +46,33 @@ export default class CoolWebPartWebPart extends BaseClientSideWebPart<ICoolWebPa
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription
+            description: strings.PropertyPaneSettings
           },
           groups: [
             {
-              groupName: strings.BasicGroupName,
+              groupName: strings.PropertiesGroupName,
               groupFields: [
+                PropertyPaneTextField('title', {
+                  label: strings.TitleFieldLabel
+                }),
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
                 })
               ]
-            }
+            },
+            {
+              groupName: strings.AdvancedGroupName,
+              groupFields: [ 
+                PropertyPaneDropdown('viewMode', {
+                  label: strings.ViewModeFieldLabel,
+                  options: [
+                    {key: 'GALLERY', text: 'Gallery'},
+                    {key: 'LIST', text: 'List'}
+                  ],
+                  selectedKey: 'LIST'
+                }),
+              ]
+            },
           ]
         }
       ]
