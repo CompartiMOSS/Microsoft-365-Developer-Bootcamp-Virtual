@@ -32,6 +32,10 @@
         padding-top: 160px;
         box-shadow: rgba($color: #888, $alpha: 0.35) 0 0 15px;
 
+        &:hover {
+          box-shadow: rgba($color: #d4af37, $alpha: 0.75) 0 0 15px;
+        }
+
         > * {
           padding: 1px 6px;  
           background: rgba($color: #f0f0f0, $alpha: 0.95);
