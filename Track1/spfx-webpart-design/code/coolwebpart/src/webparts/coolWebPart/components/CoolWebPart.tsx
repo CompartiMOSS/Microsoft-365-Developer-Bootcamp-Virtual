@@ -8,6 +8,7 @@ import { Dropdown, DropdownMenuItemType, IDropdownStyles, IDropdownOption } from
 import { CommandBar, ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
 import { IButtonProps } from 'office-ui-fabric-react/lib/Button';
 import { SaintList } from './saint/saintList';
+import { Filter } from './filters/filter';
 import { Dashboard } from './dashboard/dashboard';
 
 function getAverage(saints: ISaintProps[]) {
@@ -22,42 +23,6 @@ function getAverage(saints: ISaintProps[]) {
   
   return avg;
 }
-
-interface IFilterProps {
-  saints: ISaintProps[];
-  handleFilter: (key:string) => any;
-}
-
-const Filter = (props: IFilterProps) => {
-  const options: IDropdownOption[] = [
-    { key: 'All', text: 'All Saints' },
-    { key: 'Bronze', text: 'Bronze' },
-    { key: 'Silver', text: 'Silver' },
-    { key: 'Gold', text: 'Gold' },
-    { key: 'Legendary', text: 'Legendary' }
-  ];
-  const dropdownStyles: Partial<IDropdownStyles> = {
-    dropdown: { width: 300 },
-  };
-
-  function onSelectClass (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) {
-    if (option != null) {
-      props.handleFilter(option.key.toString());
-    }
-  }
-
-  return (
-    <>
-      <Dropdown
-        placeholder="All Saints"
-        defaultSelectedKeys={["All"]}
-        label="Filter Saints"
-        options={options}
-        styles={dropdownStyles}
-        onChange={onSelectClass} />
-    </>
-  );
-};
 
 interface ICoolWebPartState {
   saintsFiltered: ISaintProps[];
@@ -132,7 +97,7 @@ export default class CoolWebPart extends React.Component<ICoolWebPartProps, ICoo
 
     return (
       <>
-        <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
+        {/* <div className={[styles.saintsContainer, this.state.styleViewMode].join(' ')}>
           <CommandBar
             items={[]}
             overflowItems={[]}
@@ -147,10 +112,10 @@ export default class CoolWebPart extends React.Component<ICoolWebPartProps, ICoo
             goldSaints={12}
             legendarySaints={6}
             strengthAvg={getAverage(this.state.saintsFiltered)}
-          />
-          <Filter saints={this.state.saintsFiltered} handleFilter={this.FilterSaints} />
+          /> */}
+          <Filter saints={this.state.saintsFiltered} handleFilter={this.FilterSaints} /> 
           <SaintList saints={this.state.saintsFiltered} viewMode={this.state.viewMode}/>
-        </div>
+        {/* </div> */}
       </>
     );
   }
