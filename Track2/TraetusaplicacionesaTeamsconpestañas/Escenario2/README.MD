@@ -698,5 +698,161 @@ npm run build
 Si todo ha ido bien tendremos que visualizaremos la siguiente pantalla 
 ![modoHulk](./assets/img/Front.PNG)  
 
+## ¿Como lo integramos con Teams?
+
+En primer lugar tenemos que hacer todo lo del laboratorio 1. Ahora bien en el ejemplo por defecto de Teams tienen una llamada en Servidor que se hace en Express ahora como lo hacemos eso en este caso... en primer lugar nos vamos a crear un endpoint en la API en la que vamos a devolver un token valido para Graph y validado por Teams.
+
+En primer lugar nos creamos una clase AccesToken.cs dentro de la carpeta de Model
+```csharp
+using Newtonsoft.Json;
+
+namespace WebApplication5.Model
+{
+    public class AccessToken
+    {
+        [JsonProperty(PropertyName = "access_token")]
+        public string Access_token { get; set; }
+        [JsonProperty(PropertyName = "token_type")]
+        public string Token_type { get; set; }
+        [JsonProperty(PropertyName = "expires_in")]
+        public long Expires_in { get; set; }
+        [JsonProperty(PropertyName = "ext_expires_in")]
+        public long Ext_expires_in { get; set; }
+    }
+}
+```
+A continuación nos crearemos una carpeta Service y nos crearemos dos ficheros IGraphService.cs y GraphService.cs con la siguiente definición
+```csharp
+using System.Threading.Tasks;
+using WebApplication5.Model;
+
+namespace WebApplication5.Service
+{
+    public interface IGraphService
+    {        
+        Task<AccessToken> GetTokenTeams(string token, string tenantId);
+    }
+}
+```
+```csharp
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using WebApplication5.Model;
+
+namespace WebApplication5.Service
+{
+    public class GraphService : IGraphService
+    {
+        private readonly IConfiguration config;
+        private readonly HttpClient httpClient;
+        
+
+        public GraphService(IConfiguration Configuration)
+        {
+            this.config = Configuration;
+            this.httpClient = new HttpClient();
+            
+        }
+
+  
+
+        public async Task<AccessToken> GetTokenTeams(string token, string tenantId)
+        {
+
+            string loginUri = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x-www-form-urlencoded"));
+
+            var requestData = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"),
+                new KeyValuePair<string, string>("client_id", this.config.GetSection("AzureAd:ClientId").Value),
+                new KeyValuePair<string, string>("client_secret", this.config.GetSection("AzureAd:ClientSecret").Value),
+                new KeyValuePair<string, string>("assertion", token),
+                new KeyValuePair<string, string>("requested_token_use", "on_behalf_of"),
+                new KeyValuePair<string, string>("scope", "https://graph.microsoft.com/user.read"),
+
+            };
+
+            var requestBody = new FormUrlEncodedContent(requestData);
+
+            var request = await httpClient.PostAsync(loginUri, requestBody);
+            var response = await request.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<AccessToken>(response);
+
+        }
+    }
+}
+```
+
+Una vez ya tenemos el metodo vamos a implementar un endpoint en nuestra API, vamos a dejarlo abierto ya que se considera un escenario de pruebas, pero nuestra recomendación es securizar este endpoint y solamente permitirlo llamarlo desde Teams y añadirle alguna header de seguridad. Este controller lo llamaremos AuthController y quedaria de la siguiente forma.
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+
+namespace WebApplication5.API
+{
+    using System;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Linq;
+    using System.Security.Claims;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.IdentityModel.Tokens;
+    using TeamsQuiz.Infraestructure.Abstract;
+    using TeamsQuiz.Services.Abstract;
+    using TeamsQuiz.Shared.Common.Constants;
+    using TeamsQuiz.Shared.Models.Config;
+    using WebApplication5.Service;
+
+    namespace TeamsQuiz.API.Auth
+    {
+        [Route("api/[controller]")]
+        [ApiController]
+
+        public class AuthController : ControllerBase
+        {
+                        
+            private readonly IGraphService graphService;
+
+
+
+            public AuthController( IGraphService graphService)
+            {                
+                this.graphService = graphService;
+            }
+
+           
+
+            [HttpPost]            
+            [Route("tokenteams")]
+            public async Task<IActionResult> GetTokenTeams([FromBody] string token)
+            {
+                var tenantId = HttpContext.User.FindFirst(c => c.Type == "http://schemas.microsoft.com/identity/claims/tenantid")?.Value;
+                var response = await graphService.GetTokenTeams(token, tenantId);                
+                return Ok(response);
+            }            
+        }
+    }
+}
+```
+
+Ahora nos quedaria pendiente añadir la inyección de dependencias en el StartUp añadiendo la siguiente linea al final del método Services
+```csharp
+    services.TryAddTransient<IGraphService, GraphService>();        
+```
+A continuación en el Front vamos a modificar el proveedor de Graph Toolkit
+
 
 
