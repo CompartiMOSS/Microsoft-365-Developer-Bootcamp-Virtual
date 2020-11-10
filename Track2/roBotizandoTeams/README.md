@@ -22,6 +22,8 @@ Se pretende conseguir un Bot capaz de mantener una conversación de varios turno
 
 [3.-QnABot.md](./lab/3.-QnABot.md)
 
+[4-PublicacionAzure.md](./lab/4-PublicacionAzure.md)
+
 [4.-PublicarBotMicrosoftTeams.md](./lab/4-PublicarBotMicrosoftTeams.md)
 
 [5.-QnAMakerMultiturno.md](./lab/5.-QnAMakerMultiturno.md)
