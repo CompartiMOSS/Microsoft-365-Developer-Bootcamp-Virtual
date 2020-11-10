@@ -852,7 +852,81 @@ Ahora nos quedaria pendiente añadir la inyección de dependencias en el StartUp
 ```csharp
     services.TryAddTransient<IGraphService, GraphService>();        
 ```
-A continuación en el Front vamos a modificar el proveedor de Graph Toolkit
 
+A continuación en el Front vamos a modificar el comportamiento si entramos en Teams. Por eso en primer lugar vamos a comprobar si estamos en Teams o no estamos en Teams, en el caso de que estemos en Teams lo que vamos a realizar en primer lugar es pedirle un Token a Teams que nos garantice el SSO y con dicho Token realizaremos una petición a nuestra API para que nos de un token "valido" por Graph para poder seguir haciendo peticiones. En esta ocasión nos vamos a almacenar el token en la cache y de esta forma nos ahorramos pedirlo cada vez (Tener en cuenta que estamos en un ejercicio demo). Para ello tendriamos que hacer lo siguiente:
 
+Función para saber si estamos en Teams o no (la propia que hay en el SDK no se comporta bien)
+```typescript
+export default class TeamsFunctions {
+    public static IsInTeams(): boolean {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+```
+
+Ahora se modifica el index.tsx quedando de la siguiente forma:
+```typescript
+if (TeamsFunctions.IsInTeams()) {
+	microsoftTeams.getContext(function (context: any) {		 
+					microsoftTeams.authentication.getAuthToken({
+						successCallback: (tokenGraph: string) => {
+							 authAPI.getTokenGraph2Async(tokenGraph).then((token: string) => {
+								localStorage.setItem("token", token);
+							 });
+						},
+						failureCallback: (reason: string) => {
+							console.log(reason);
+						}, resources: [process.env.REACT_APP_MSALCLIENTID]
+					})
+					renderApp();
+				});						
+}
+else {
+	renderApp();
+}
+```
+
+Ahora que tendriamos que hacer modificar el SimpleProvider para ello lo que haremos es coger el token que acabamos de obtener y quedaria de la siguiente forma
+```typescript
+Providers.globalProvider = new SimpleProvider(async (scopes) => {
+
+	if (!TeamsFunctions.IsInTeams()) {
+		const request: AuthenticationParameters = {
+		};
+		request.scopes = scopes;
+		return msalInstance.acquireTokenSilent(request).then((response) => {
+			return response.accessToken;
+		});
+	}
+	else {
+		return localStorage.getItem("token")
+	}
+});
+```
+
+y por último lo que nos quedaria es en el Fetch coger el token segun corresponda  para ello modificamos el codigo al siguiente 
+```typescript
+  public async fetch(url: string, options: FetchOptions = {}): Promise<Response> {
+    if (!isUrlAbsolute(url)) {
+      throw new Error('You must supply absolute urls to PnPFetchClient.fetch.');
+    }
+    let token = "";
+    if (!TeamsFunctions.IsInTeams()) {
+      token = await this.getToken(this.getResource(url));
+    }
+    else {
+      token = localStorage.getItem("adal_44");
+    }
+    this.token = token;
+    Providers.globalProvider.setState(ProviderState.SignedIn);
+    return super.fetch(url, options);
+  }
+```
+
+## Todavia hay mas 
+Ahora nos queda crear la APP de Teams bien haciendo uso de APP Studio o bien desde el propio Visual Studio Code.
 
