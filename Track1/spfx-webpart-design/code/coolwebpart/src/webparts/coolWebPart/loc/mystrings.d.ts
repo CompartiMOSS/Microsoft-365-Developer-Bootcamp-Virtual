@@ -1,7 +1,10 @@
 declare interface ICoolWebPartWebPartStrings {
-  PropertyPaneDescription: string;
-  BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  PropertyPaneSettings: string,
+  PropertiesGroupName: string,
+  AdvancedGroupName: string,
+  TitleFieldLabel: string,
+  DescriptionFieldLabel: string,
+  ViewModeFieldLabel: string
 }
 
 declare module 'CoolWebPartWebPartStrings' {
